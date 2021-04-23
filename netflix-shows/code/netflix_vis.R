@@ -10,6 +10,8 @@ tuesdata <- tidytuesdayR::tt_load(2021, week = 17)
 nfx_data <- tuesdata$netflix
 # create_report(nfx_data)
 
+########## EXPLORATION ########## 
+
 str(nfx_data)
 head(nfx_data)
 
@@ -22,4 +24,9 @@ ggplot(data=nfx_data, aes(x=rating)) +
   scale_y_continuous(expand=c(0,0), limits=c(0, max(table(nfx_data$rating)+200)))+
   coord_flip() 
 
-            
+
+nfx_mod <- nfx_data
+nfx_mod$date_added <- as.Date(nfx_mod$date_added, format = "%B %d, %Y")
+nfx_mod %>% filter(is.na(date_added))
+range(nfx_mod$release_year)
+
