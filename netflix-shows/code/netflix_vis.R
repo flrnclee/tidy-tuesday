@@ -1,3 +1,5 @@
+# Set-up ---------------------------------------
+
 library(tidytuesdayR)
 library(tidyverse)
 library(DataExplorer)
@@ -11,7 +13,7 @@ tuesdata <- tidytuesdayR::tt_load(2021, week = 17)
 nfx_data <- tuesdata$netflix
 # create_report(nfx_data)
 
-# Exploration ---------------------------------
+# Exploration & Preparation ---------------------------------
 
 str(nfx_data)
 head(nfx_data)
@@ -23,10 +25,7 @@ nfx_mod <- nfx_data
 nfx_mod$date_added <- as.Date(nfx_mod$date_added, format = "%B %d, %Y")
 nfx_mod %>% filter(is.na(date_added))
 
-nfx_mod$year_added <- format(nfx_mod$date_added, "%Y")
-nfx_mod$month_added <- format(nfx_mod$date_added, "%m")
-
-p1 <- ggplot(data=nfx_mod, aes(x=year_added)) +
+ggplot(data=nfx_mod, aes(x=year_added)) +
   geom_bar() + 
   geom_text(stat='count', aes(label=..count..), hjust=-0.1) + 
   scale_y_continuous(expand=c(0,0), limits=c(0, max(table(nfx_mod$year_added))+250)) +
@@ -34,7 +33,7 @@ p1 <- ggplot(data=nfx_mod, aes(x=year_added)) +
   coord_flip() +
   ggtitle("Titles added by year")
 
-p2 <- ggplot(data=nfx_mod, aes(x=month_added)) +
+ggplot(data=nfx_mod, aes(x=month_added)) +
   geom_bar() + 
   geom_text(stat='count', aes(label=..count..), hjust=-0.1) + 
   scale_y_continuous(expand=c(0,0), limits=c(0, max(table(nfx_mod$month_added))+200))+
@@ -42,15 +41,46 @@ p2 <- ggplot(data=nfx_mod, aes(x=month_added)) +
   coord_flip()  + 
   ggtitle("Titles added by month")
 
-p1 | p2
-
-p <- ggplot(data=nfx_mod, aes(x=rating)) +
+ggplot(data=nfx_mod, aes(x=rating)) +
   geom_bar() + 
   geom_text(stat='count', aes(label=..count..), hjust=-0.1) + 
   scale_y_continuous(expand=c(0,0), limits=c(0, max(table(nfx_data$rating)+200)))+
-  coord_flip() 
+  coord_flip() +
+  facet_grid(cols = vars(type))
 
-p + facet_grid(cols = vars(type))
+
+# Titles over time ------------------------------------------
+
+nfx_mod$year_added <- format(nfx_mod$date_added, "%Y")
+nfx_mod$date_added_abbv <- format(nfx_mod$date_added, "%Y-%m")
+
+title_ct_trend <- nfx_mod %>% 
+  count(date_added_abbv) %>% 
+  arrange(date_added_abbv) %>%
+  mutate(date_added_abbv=paste0(date_added_abbv, "-01"))
+title_ct_trend$date_added_abbv <- as.Date(title_ct_trend$date_added_abbv)
+
+dts_all <- seq(min(nfx_mod$date_added, na.rm=T), max(nfx_mod$date_added, na.rm=T), by = "month")
+
+dt_range <- dts_all %>% 
+  as.data.frame() %>%
+  rename("date_added_abbv"=".")
+
+title_ct_trend <- dt_range %>%
+  left_join(title_ct_trend)
+
+title_ct_trend[is.na(title_ct_trend)] <- 0
+
+#
+
+ggplot(data=title_ct_trend, aes(x=date_added_abbv, y=n)) +
+  geom_bar(stat='identity') +
+  ggtitle("Number of Netflix titles added by month")
+
+#
+
+
+
 
 # Several movies have TV ratings
 # If we want to use ratings, it might be helpful to group them
