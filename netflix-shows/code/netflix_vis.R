@@ -109,6 +109,15 @@ nfx_genre %>%
   unique() %>%
   sort()
 
+nfx_genre_t <- nfx_genre %>%
+  gather(key = "cat",
+         value = "genre",
+         listed_in_1,
+         listed_in_2,
+         listed_in_3,
+         na.rm= TRUE) %>%
+  select(-cat)
+  
 ####### CHARTS #########
 # How have releases changed over time (TV Shows vs. Movies)
 # -- Number of releases
