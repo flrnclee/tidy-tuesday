@@ -5,6 +5,7 @@ library(tidyverse)
 library(DataExplorer)
 library(Cairo)
 library(patchwork)
+library(splitstackshape)
 
 # Read in data from TidyTuesday
 tuesdata <- tidytuesdayR::tt_load('2021-04-20')
@@ -48,6 +49,8 @@ ggplot(data=nfx_mod, aes(x=rating)) +
   coord_flip() +
   facet_grid(cols = vars(type))
 
+# Several movies have TV ratings
+# If we want to use ratings, it might be helpful to group them
 
 # Titles over time ------------------------------------------
 
@@ -77,18 +80,38 @@ ggplot(data=title_ct_trend, aes(x=date_added_abbv, y=n)) +
   geom_bar(stat='identity') +
   ggtitle("Number of Netflix titles added by month")
 
-#
+# Cleaning up genre data ------------------------------------------
 
+nfx_genre <- nfx_mod
 
+nfx_genre <- nfx_genre %>%
+  cSplit("listed_in", sep=",")
 
+clean_genre <- function(col) {
+  col <- sub("TV", "", col)
+  col <- sub("Shows", "", col)
+  col <- sub("Movies", "", col)
+  col <- sub("", "", col)
+  col <- str_trim(col)
+  
+  col <- ifelse(col %in% c("Classic", "Cult"), "Classic & Cult",
+                   ifelse(col=="Stand-Up Comedy & Talk", "Stand-Up Comedy",
+                          ifelse(col=="Kids'", "Kids", col)))
+}
 
-# Several movies have TV ratings
-# If we want to use ratings, it might be helpful to group them
+nfx_genre <- nfx_genre %>%
+  mutate(across(c("listed_in_1", "listed_in_2", "listed_in_3"), clean_genre))
+
+nfx_genre %>%
+  select(listed_in_1, listed_in_2, listed_in_3) %>%
+  t %>%
+  c %>%
+  unique() %>%
+  sort()
 
 ####### CHARTS #########
 # How have releases changed over time (TV Shows vs. Movies)
 # -- Number of releases
 # -- Genre of releases
-# -- Average length of a feature
 
 
