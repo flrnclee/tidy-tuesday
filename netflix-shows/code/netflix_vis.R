@@ -43,9 +43,8 @@ ggplot(data=nfx_mod, aes(x=rating)) +
 # Several movies have TV ratings
 # If we want to use ratings, it might be helpful to group them
 
-# Titles over time ------------------------------------------
+# Titles over time, by year ------------------------------------------
 
-# By year
 ggplot(data=nfx_mod, aes(x=year_added)) +
   geom_bar() + 
   geom_text(stat='count', aes(label=..count..), hjust=-0.1) + 
@@ -54,6 +53,11 @@ ggplot(data=nfx_mod, aes(x=year_added)) +
   coord_flip() +
   ggtitle("Titles added by year")
 
+# Title started picking up in 2015
+
+# Titles over time, by month ------------------------------------------
+
+# Prepare to break up data by month-year 
 nfx_mod$date_added_my <- format(nfx_mod$date_added, "%Y-%m")
 nfx_mod <- nfx_mod %>% mutate(date_added_my=paste0(date_added_my, "-01"))
 
@@ -62,6 +66,7 @@ title_cts <- nfx_mod %>%
   arrange(date_added_my)
 title_cts$date_added_my <- as.Date(title_cts$date_added_my)
 
+# Vector of all dates from first title added to most recent
 dts_mon_all <- seq(min(nfx_mod$date_added, na.rm=T), 
                    max(nfx_mod$date_added, na.rm=T), 
                    by = "month")
@@ -76,7 +81,7 @@ ggplot(data=title_cts, aes(x=date_added_my, y=n)) +
   ggtitle("Number of Netflix titles added by month")
 
 
-# Horizontal tile plot -------------------------------------------
+# Create horizontal tile plot
 
 title_cts <- title_cts %>%
   mutate(date_added_my_pos = as.numeric(date_added_my)) %>%
@@ -84,16 +89,13 @@ title_cts <- title_cts %>%
   rename("n_all"="n")
 
 # Break axis by year based on range of dates
-
 axisbreaks <- title_cts$date_added_my_pos[seq(1, length(title_cts$date_added_my_pos),12)]
 
 # Extract years for label
-
 axislabels <- data.frame(label = title_cts$date_added_my[seq(1, length(title_cts$date_added_my), 12)]) %>%
   mutate(label = str_sub(label, end=4))
 
-# Produce strip plot
-
+# Create plot
 stripplt <- ggplot() + geom_tile(data = filter(title_cts, date_added_my >= "2015-01-01"),
                     mapping = aes(x = date_added_my_pos,
                                   y = 1,
@@ -106,7 +108,7 @@ stripplt <- ggplot() + geom_tile(data = filter(title_cts, date_added_my >= "2015
 
 stripplt
 
-# Cleaning up genre data ------------------------------------------
+# Cleaning up data by genre ------------------------------------------
 
 nfx_genre <- nfx_mod
 
@@ -134,8 +136,7 @@ clean_genre <- function(col) {
 nfx_genre <- nfx_genre %>%
   mutate(across(c("listed_in_1", "listed_in_2", "listed_in_3"), clean_genre))
 
-# Need to deduplicate
-
+# Print list of unique genres across all listed_in cols
 nfx_genre %>%
   select(listed_in_1, listed_in_2, listed_in_3) %>%
   t %>%
@@ -161,13 +162,30 @@ nfx_genre_t <- nfx_genre %>%
 nfx_genre_t <- nfx_genre_t %>%
   distinct(show_id, genre, .keep_all = TRUE)
 
-
 # Other notes --------------------------------------------
 
 # Multi-season Netflix shows are not listed individually.
 
 # "The Crown", which is currently in its 4th season, is only listed once based
 # on latest date_added.
+
+
+# Look at genre counts in 2020 -------------------------
+
+nfx_genre_20 <- nfx_genre_t %>%
+  filter(year_added=="2020") %>%
+  count(genre) %>%
+  arrange(-n)
+
+ggplot(data=nfx_genre_20, aes(x=reorder(genre, n), y=n)) +
+  geom_bar(stat='identity') +
+  geom_text(stat='identity', aes(label=n), hjust=-0.1) + 
+  coord_flip() + 
+  ggtitle("Number of 2020 titles by genre")
+
+# Top 10
+# International, Dramas, Comedies, Children & Family, Romantic,
+# Action & Adventure, Documentaries, Thrillers, Independent, Crime
 
 # Look at genre counts over time -------------------------
 
@@ -198,7 +216,7 @@ nfx_genre_cts <- nfx_genre_cts %>%
 # May want to limit to smaller window to avoid impact of
 # increasing num of titles being added over time
 
-ggplot() + geom_tile(data = filter(nfx_genre_cts, date_added_my > "2015-01-01", genre=="Sports"),
+ggplot() + geom_tile(data = filter(nfx_genre_cts, date_added_my > "2015-01-01", genre=="Crime"),
                      mapping = aes(x = date_added_my_pos,
                                    y = 1,
                                    fill = n), width = 30) +
@@ -208,6 +226,7 @@ ggplot() + geom_tile(data = filter(nfx_genre_cts, date_added_my > "2015-01-01", 
                      position = "bottom") #+ 
 #theme_void()
 
+
 # Normalize by total number of titles released
 
 nfx_genre_pcts <- nfx_genre_cts %>% 
@@ -216,12 +235,37 @@ nfx_genre_pcts <- nfx_genre_cts %>%
 
 nfx_genre_pcts[is.na(nfx_genre_pcts)] <- 0
 
-ggplot() + geom_tile(data = filter(nfx_genre_pcts, date_added_my > "2015-01-01", genre=="Documentaries"),
+ggplot() + geom_tile(data = filter(nfx_genre_pcts, date_added_my > "2015-01-01", genre=="Romantic"),
                                  mapping = aes(x = date_added_my_pos,
                                                y = 1,
                                                fill = pct), width = 30) +
-  scale_fill_gradient(low =  "#190103", high ="#e50914", limits = c(0, 100)) +
+  scale_fill_gradient(low =  "#190103", high ="#e50914") +
   scale_x_continuous(breaks = axisbreaks, 
                      labels = axislabels$label, 
                      position = "bottom") #+ 
 #theme_void()
+
+ggplot(data=filter(nfx_genre_pcts, date_added_my > "2015-01-01", genre=="Romantic"), aes(x=date_added_my_pos, y=pct)) +
+  geom_bar(stat='identity') +
+  scale_x_continuous(breaks = axisbreaks, labels = axislabels$label) + 
+  scale_y_continuous(limits=c(0, 100))
+
+# Creat layout -------------------------------------
+
+layout <- c(
+  
+  area(1, 1, 4, 15),
+  area(5, 1, 10, 15),
+  area(11, 1, 12, 3),
+  area(11, 4, 12, 15),
+  area(13, 1, 14, 3),
+  area(13, 4, 14, 15),
+  area(15, 1, 16, 3),
+  area(15, 4, 16, 15),
+  area(17, 1, 18, 3),
+  area(17, 4, 18, 15),
+  area(19, 1, 20, 3),
+  area(19, 4, 20, 15)
+)
+
+plot(layout)
