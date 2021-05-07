@@ -6,6 +6,8 @@ library(DataExplorer)
 library(Cairo)
 library(patchwork)
 library(splitstackshape)
+library(extrafont)
+loadfonts(device="win")
 library(ggplot2)
 library(ggtext)
 library(ggfx)
@@ -34,32 +36,12 @@ nfx_mod <- nfx_mod %>% filter(!is.na(date_added))
 
 nfx_mod$year_added <- format(nfx_mod$date_added, "%Y")
 
-ggplot(data=nfx_mod, aes(x=rating)) +
-  geom_bar() + 
-  geom_text(stat='count', aes(label=..count..), hjust=-0.1) + 
-  scale_y_continuous(expand=c(0,0), limits=c(0, max(table(nfx_data$rating)+200)))+
-  coord_flip() +
-  facet_grid(cols = vars(type)) +
-  ggtitle("Distribution of ratings by type")
-
-# Several movies have TV ratings
-# If we want to use ratings, it might be helpful to group them
-
 # Titles over time, by year ------------------------------------------
 
 title_cts_yr <- nfx_mod %>% 
   count(year_added) %>% 
   arrange(year_added) %>%
   rename("n_all"="n")
-
-ggplot(data=title_cts_yr, aes(x=year_added, y=n)) +
-  geom_bar(stat='identity') +
-  geom_text(stat='identity', aes(label=n), hjust=-0.1) +
-  scale_x_discrete(limits=rev) +
-  coord_flip() + 
-  ggtitle("Number of Netflix titles added by year") 
-
-# Title started picking up in 2015
 
 # Titles over time, by month ------------------------------------------
 
@@ -82,17 +64,12 @@ title_cts_mo <- title_cts_mo %>%
 
 title_cts_mo[is.na(title_cts_mo$n),]$n <- 0
 
-ggplot(data=title_cts_mo, aes(x=date_added_my, y=n)) +
-  geom_bar(stat='identity') +
-  ggtitle("Number of Netflix titles added by month")
-
-
-# Create horizontal tile plot
-
 title_cts_mo <- title_cts_mo %>%
   mutate(date_added_my_pos = as.numeric(date_added_my)) %>%
   select(date_added_my, date_added_my_pos, n) %>%
   rename("n_all"="n")
+
+# Create horizontal tile plot
 
 # Break axis by year based on range of dates
 axisbreaks <- title_cts_mo$date_added_my_pos[seq(1, length(title_cts_mo$date_added_my_pos),12)]
@@ -101,18 +78,34 @@ axisbreaks <- title_cts_mo$date_added_my_pos[seq(1, length(title_cts_mo$date_add
 axislabels <- data.frame(label = title_cts_mo$date_added_my[seq(1, length(title_cts_mo$date_added_my), 12)]) %>%
   mutate(label = str_sub(label, end=4))
 
-# Create plot
-stripplt <- ggplot() + geom_tile(data = filter(title_cts_mo, date_added_my >= "2015-01-01"),
-                    mapping = aes(x = date_added_my_pos,
-                                  y = 1,
-                                  fill = n_all), width = 30) +
-  scale_fill_gradient(low =  "#190103", high ="#e50914") +
+stripplt <- ggplot() + 
+  geom_tile(data = title_cts_mo, 
+            mapping = aes(x = date_added_my_pos, y = 1, fill = n_all), 
+            width = 30) +
+  scale_fill_gradient(name="<span style='font-size:8pt'>Titles added per month</span>", 
+                      low="#190103", high="#e50914",
+                      limits=c(0,300)) +
   scale_x_continuous(breaks = axisbreaks, 
                      labels = axislabels$label, 
-                     position = "bottom") #+ 
-  #theme_void()
+                     position = "bottom") +
+  ggtitle("Number of titles added peaked in late 2019") +
+  guides(fill = guide_colourbar(title.position = 'top', title.hjust = 0.5, barwidth = unit(20, 'lines'), barheight = unit(0.5, 'lines')))
 
-stripplt
+stripplt + 
+  theme(text = element_text(family='Verdana'), 
+        panel.background = element_blank(),
+        panel.grid=element_blank(),
+        axis.ticks=element_blank(),
+        axis.text.x=element_text(colour='#000000'),
+        axis.text.y=element_blank(),
+        panel.border=element_blank(),
+        legend.title=element_markdown(),
+        legend.text=element_text(size=8),
+        plot.title = element_text(face = 'bold', hjust = 0.5),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.position='top')
+  
 
 # Cleaning up data by genre ------------------------------------------
 
@@ -229,38 +222,61 @@ lab15<-paste(title_genre_1520$genre, (paste0(round(title_genre_1520$pct15,0), "%
 lab20<-paste(title_genre_1520$genre, (paste0(round(title_genre_1520$pct20,0), "% (#", title_genre_1520$rank20, ")")),sep=", ")
 
 slopeplt <-ggplot(data = title_genre_1520) + 
-  geom_segment(aes(x=0,xend=dist,
-                   y=pct15,yend=pct20), 
-               colour='#221F1F',
-               size=.7, 
+  geom_segment(aes(x=0,xend=dist,y=pct15, yend=pct20), 
+               colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#000000"),
+               size= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, 1.5, 0.7), 
                lineend="round") +
-  geom_point(aes(x=0, y=pct15), colour='#E50914',
-             size=3) + 
-  geom_point(aes(x=dist, y=pct20), colour='#E50914',
-             size=3) +
-  xlim(0-2, dist+2) +
+  geom_point(aes(x=0, y=pct15), 
+             colour=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#000000"),
+             size=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, 4, 3)) + 
+  geom_point(aes(x=dist, y=pct20), 
+             colour=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#000000"),
+             size=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, 4, 3)) +
+  xlim(0-1.5, dist+1.5) +
   ylim(0, 1.05*max_pct) +
-  geom_text(label=lab20, 
-            y=title_genre_1520$pct20, 
-            x=rep.int(dist, nrow(title_genre_1520)),
-            hjust=-0.2,
-            vjust=0.7,
-            size=3.5) +
-  geom_text(label=lab15, 
-            y=title_genre_1520$pct15, 
-            x=rep.int(0, nrow(title_genre_1520)),
-            hjust=1.2,
-            size=3.5) +
-  ggtitle("Top 5 genres in 2015 vs. 2020")
+  geom_text(aes(label=lab20, y=pct20, x=rep.int(dist, nrow(title_genre_1520))),
+            hjust=0, 
+            nudge_x=0.15,
+            nudge_y=0.05,
+            size=3, 
+            family='Verdana',
+            colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#000000"),
+            fontface=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "bold", "plain")) +
+  geom_text(aes(label=lab15, y=pct15, x=rep.int(0, nrow(title_genre_1520))),
+            hjust=1, 
+            nudge_x=-0.15,
+            nudge_y=0.05,
+            size=3,
+            family='Verdana',
+            colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#000000"),
+            fontface=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "bold", "plain")) +
+  geom_text(label="2015", x=0, y=max_pct+3,
+            hjust=1,
+            size=4,
+            family='Verdana') +
+  geom_text(label="2020", x=dist, y=max_pct+3,
+            hjust=0,
+            size=4,
+            family='Verdana') +
+  labs(title="<b>The rise of International titles</b><br>
+    <span style = 'font-size:10pt;'>Right before Netflix ramped up the number
+    of titles they were adding per month, only 19% of titles were International in 2015. By 2020,
+       **nearly half** of added titles were International.</span></span>")
 
-slopeplt + theme(panel.background = element_blank(),
-               panel.grid=element_blank(),
-               axis.ticks=element_blank(),
-               axis.text=element_blank(),
-               panel.border=element_blank())
+# Customize theme for slope plot
 
-
-
+slopeplt + theme(text = element_text(family='Verdana'), 
+  panel.background = element_blank(),
+  panel.grid=element_blank(),
+  axis.ticks=element_blank(),
+  axis.text=element_blank(),
+  panel.border=element_blank(),
+  plot.title = element_textbox_simple(
+    lineheight = 1.05,
+    padding = margin(5.5, 5.5, 5.5, 5.5)
+  ),
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank())
 
 # Create layout -------------------------------------
 
@@ -281,3 +297,30 @@ layout <- c(
 )
 
 plot(layout)
+
+
+# Test area -------------------------------------------
+
+df <- data.frame(
+  x = 0.1,
+  y = 0.8,
+  label = "*Lorem ipsum dolor sit amet,* consectetur adipiscing
+  elit. Quisque tincidunt eget arcu in pulvinar. Morbi varius leo
+  vel consectetur luctus. **Morbi facilisis justo non fringilla.**
+  Vivamus sagittis sem felis, vel lobortis risus mattis eget. Nam
+  quis imperdiet felis, in convallis elit."
+)
+
+p <- ggplot() +
+  geom_textbox(
+    data = df,
+    aes(x, y, label = label),
+    width = grid::unit(0.73, "npc"), # 73% of plot panel width
+    hjust = 0, vjust = 1
+  ) +
+  xlim(0, 1) + ylim(0, 1)
+
+p 
+
+# https://ggplot2-book.org/annotations.html
+# https://www.cedricscherer.com/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/#text 
