@@ -45,13 +45,17 @@ ggplot(data=nfx_mod, aes(x=rating)) +
 
 # Titles over time, by year ------------------------------------------
 
-ggplot(data=nfx_mod, aes(x=year_added)) +
-  geom_bar() + 
-  geom_text(stat='count', aes(label=..count..), hjust=-0.1) + 
-  scale_y_continuous(expand=c(0,0), limits=c(0, max(table(nfx_mod$year_added))+250)) +
-  scale_x_discrete(limits=rev) + 
-  coord_flip() +
-  ggtitle("Titles added by year")
+title_cts_yr <- nfx_mod %>% 
+  count(year_added) %>% 
+  arrange(year_added) %>%
+  rename("n_all"="n")
+
+ggplot(data=title_cts_yr, aes(x=year_added, y=n)) +
+  geom_bar(stat='identity') +
+  geom_text(stat='identity', aes(label=n), hjust=-0.1) +
+  scale_x_discrete(limits=rev) +
+  coord_flip() + 
+  ggtitle("Number of Netflix titles added by year") 
 
 # Title started picking up in 2015
 
@@ -61,42 +65,42 @@ ggplot(data=nfx_mod, aes(x=year_added)) +
 nfx_mod$date_added_my <- format(nfx_mod$date_added, "%Y-%m")
 nfx_mod <- nfx_mod %>% mutate(date_added_my=paste0(date_added_my, "-01"))
 
-title_cts <- nfx_mod %>% 
+title_cts_mo <- nfx_mod %>% 
   count(date_added_my) %>% 
   arrange(date_added_my)
-title_cts$date_added_my <- as.Date(title_cts$date_added_my)
+title_cts_mo$date_added_my <- as.Date(title_cts_mo$date_added_my)
 
 # Vector of all dates from first title added to most recent
 dts_mon_all <- seq(min(nfx_mod$date_added, na.rm=T), 
                    max(nfx_mod$date_added, na.rm=T), 
                    by = "month")
 
-title_cts <- title_cts %>% 
+title_cts_mo <- title_cts_mo %>% 
   complete(date_added_my = dts_mon_all)
 
-title_cts[is.na(title_cts$n),]$n <- 0
+title_cts_mo[is.na(title_cts_mo$n),]$n <- 0
 
-ggplot(data=title_cts, aes(x=date_added_my, y=n)) +
+ggplot(data=title_cts_mo, aes(x=date_added_my, y=n)) +
   geom_bar(stat='identity') +
   ggtitle("Number of Netflix titles added by month")
 
 
 # Create horizontal tile plot
 
-title_cts <- title_cts %>%
+title_cts_mo <- title_cts_mo %>%
   mutate(date_added_my_pos = as.numeric(date_added_my)) %>%
   select(date_added_my, date_added_my_pos, n) %>%
   rename("n_all"="n")
 
 # Break axis by year based on range of dates
-axisbreaks <- title_cts$date_added_my_pos[seq(1, length(title_cts$date_added_my_pos),12)]
+axisbreaks <- title_cts_mo$date_added_my_pos[seq(1, length(title_cts_mo$date_added_my_pos),12)]
 
 # Extract years for label
-axislabels <- data.frame(label = title_cts$date_added_my[seq(1, length(title_cts$date_added_my), 12)]) %>%
+axislabels <- data.frame(label = title_cts_mo$date_added_my[seq(1, length(title_cts_mo$date_added_my), 12)]) %>%
   mutate(label = str_sub(label, end=4))
 
 # Create plot
-stripplt <- ggplot() + geom_tile(data = filter(title_cts, date_added_my >= "2015-01-01"),
+stripplt <- ggplot() + geom_tile(data = filter(title_cts_mo, date_added_my >= "2015-01-01"),
                     mapping = aes(x = date_added_my_pos,
                                   y = 1,
                                   fill = n_all), width = 30) +
@@ -170,87 +174,42 @@ nfx_genre_t <- nfx_genre_t %>%
 # on latest date_added.
 
 
-# Look at genre counts in 2020 -------------------------
-
-nfx_genre_20 <- nfx_genre_t %>%
-  filter(year_added=="2020") %>%
-  count(genre) %>%
-  arrange(-n)
-
-ggplot(data=nfx_genre_20, aes(x=reorder(genre, n), y=n)) +
-  geom_bar(stat='identity') +
-  geom_text(stat='identity', aes(label=n), hjust=-0.1) + 
-  coord_flip() + 
-  ggtitle("Number of 2020 titles by genre")
-
-# Top 10
-# International, Dramas, Comedies, Children & Family, Romantic,
-# Action & Adventure, Documentaries, Thrillers, Independent, Crime
-
-# Look at genre counts over time -------------------------
-
-unique(nfx_genre_t$genre)
-
-# How does distribution of titles change over time by genre?
-
-# If you don't normalize, you will see brighter colors over time
-# since there are more added titles.
+# Look at genre counts -------------------------
 
 nfx_genre_cts <- nfx_genre_t %>%
-  group_by(genre) %>%
-  count(date_added_my)
-
-nfx_genre_cts$date_added_my <- as.Date(nfx_genre_cts$date_added_my)
-
-nfx_genre_cts <- nfx_genre_cts %>%
-  group_by(genre) %>%
-  complete(genre, date_added_my = dts_mon_all)
-
-nfx_genre_cts[is.na(nfx_genre_cts)] <- 0
-
-nfx_genre_cts <- nfx_genre_cts %>%
-  mutate(date_added_my_pos = as.numeric(date_added_my)) %>%
-  select(genre, date_added_my, date_added_my_pos, n) %>%
-  arrange(genre, date_added_my)
-
-# May want to limit to smaller window to avoid impact of
-# increasing num of titles being added over time
-
-ggplot() + geom_tile(data = filter(nfx_genre_cts, date_added_my > "2015-01-01", genre=="Crime"),
-                     mapping = aes(x = date_added_my_pos,
-                                   y = 1,
-                                   fill = n), width = 30) +
-  scale_fill_gradient(low =  "#190103", high ="#e50914") +
-  scale_x_continuous(breaks = axisbreaks, 
-                     labels = axislabels$label, 
-                     position = "bottom") #+ 
-#theme_void()
-
+  group_by(year_added) %>%
+  count(genre) %>%
+  arrange(year_added, -n) %>%
+  ungroup()
 
 # Normalize by total number of titles released
 
-nfx_genre_pcts <- nfx_genre_cts %>% 
-  left_join(title_cts) %>%
+nfx_genre_cts <- nfx_genre_cts %>% 
+  left_join(title_cts_yr) %>%
   mutate(pct = 100*(n/n_all))
 
-nfx_genre_pcts[is.na(nfx_genre_pcts)] <- 0
+nfx_genre_cts[is.na(nfx_genre_cts)]
 
-ggplot() + geom_tile(data = filter(nfx_genre_pcts, date_added_my > "2015-01-01", genre=="Romantic"),
-                                 mapping = aes(x = date_added_my_pos,
-                                               y = 1,
-                                               fill = pct), width = 30) +
-  scale_fill_gradient(low =  "#190103", high ="#e50914") +
-  scale_x_continuous(breaks = axisbreaks, 
-                     labels = axislabels$label, 
-                     position = "bottom") #+ 
-#theme_void()
+# Test out slope graph
 
-ggplot(data=filter(nfx_genre_pcts, date_added_my > "2015-01-01", genre=="Romantic"), aes(x=date_added_my_pos, y=pct)) +
-  geom_bar(stat='identity') +
-  scale_x_continuous(breaks = axisbreaks, labels = axislabels$label) + 
-  scale_y_continuous(limits=c(0, 100))
+nfx_genre_20 <- nfx_genre_cts %>%
+  filter(year_added=="2020") %>%
+  arrange(-pct) %>%
+  select(genre, pct) %>%
+  rename("pct20"="pct")
 
-# Creat layout -------------------------------------
+nfx_genre_15 <- nfx_genre_cts %>%
+  filter(year_added=="2015") %>%
+  arrange(-pct) %>%
+  select(genre, pct) %>%
+  rename("pct15"="pct")
+
+nfx_slope_plt <- nfx_genre_20 %>%
+  left_join(nfx_genre_15)
+
+# https://acaird.github.io/computers/r/2013/11/27/slopegraphs-ggplot
+
+# Create layout -------------------------------------
 
 layout <- c(
   
