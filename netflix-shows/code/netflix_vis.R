@@ -9,6 +9,8 @@ library(splitstackshape)
 library(ggplot2)
 library(ggtext)
 library(ggfx)
+library(scales)
+
 
 # Read in data from TidyTuesday
 tuesdata <- tidytuesdayR::tt_load('2021-04-20')
@@ -148,7 +150,7 @@ nfx_genre %>%
   unique() %>%
   sort()
 
-nfx_genre_t <- nfx_genre %>%
+nfx_genre <- nfx_genre %>%
   gather(key = "cat",
          value = "genre",
          listed_in_1,
@@ -163,7 +165,7 @@ nfx_genre_t <- nfx_genre %>%
 # After cleaning genres in listed_in columns, 
 # we might have duplicates by show_id and genre
 
-nfx_genre_t <- nfx_genre_t %>%
+nfx_genre <- nfx_genre %>%
   distinct(show_id, genre, .keep_all = TRUE)
 
 # Other notes --------------------------------------------
@@ -176,7 +178,7 @@ nfx_genre_t <- nfx_genre_t %>%
 
 # Look at genre counts -------------------------
 
-nfx_genre_cts <- nfx_genre_t %>%
+title_genre_yr <- nfx_genre %>%
   group_by(year_added) %>%
   count(genre) %>%
   arrange(year_added, -n) %>%
@@ -184,30 +186,81 @@ nfx_genre_cts <- nfx_genre_t %>%
 
 # Normalize by total number of titles released
 
-nfx_genre_cts <- nfx_genre_cts %>% 
+title_genre_yr <- title_genre_yr %>% 
   left_join(title_cts_yr) %>%
   mutate(pct = 100*(n/n_all))
 
-nfx_genre_cts[is.na(nfx_genre_cts)]
+title_genre_yr[is.na(title_genre_yr)]
 
-# Test out slope graph
+# Slope graph to compare change between titles released
+# in 2015 and titles released in 2020
 
-nfx_genre_20 <- nfx_genre_cts %>%
+title_genre_20 <- title_genre_yr %>%
   filter(year_added=="2020") %>%
   arrange(-pct) %>%
   select(genre, pct) %>%
   rename("pct20"="pct")
 
-nfx_genre_15 <- nfx_genre_cts %>%
+order_pct <- order(title_genre_20$pct20, decreasing = T)
+title_genre_20$rank20 <- NA 
+title_genre_20$rank20[order_pct] <- 1:nrow(title_genre_20)
+title_genre_20
+
+title_genre_15 <- title_genre_yr %>%
   filter(year_added=="2015") %>%
   arrange(-pct) %>%
   select(genre, pct) %>%
   rename("pct15"="pct")
 
-nfx_slope_plt <- nfx_genre_20 %>%
-  left_join(nfx_genre_15)
+order_pct <- order(title_genre_15$pct15, decreasing = T)
+title_genre_15$rank15 <- NA 
+title_genre_15$rank15[order_pct] <- 1:nrow(title_genre_15)
+title_genre_15
 
-# https://acaird.github.io/computers/r/2013/11/27/slopegraphs-ggplot
+title_genre_1520 <- title_genre_20 %>%
+  left_join(title_genre_15) %>%
+  filter((rank20 >= 1 & rank20 <= 5) | (rank15 >=1 & rank15 <= 5))
+
+dist <- 5
+max_pct <- max(title_genre_1520$pct15, title_genre_1520$pct20)
+
+
+lab15<-paste(title_genre_1520$genre, (paste0(round(title_genre_1520$pct15,0), "% (#", title_genre_1520$rank15, ")")),sep=", ")
+lab20<-paste(title_genre_1520$genre, (paste0(round(title_genre_1520$pct20,0), "% (#", title_genre_1520$rank20, ")")),sep=", ")
+
+slopeplt <-ggplot(data = title_genre_1520) + 
+  geom_segment(aes(x=0,xend=dist,
+                   y=pct15,yend=pct20), 
+               colour='#221F1F',
+               size=.7, 
+               lineend="round") +
+  geom_point(aes(x=0, y=pct15), colour='#E50914',
+             size=3) + 
+  geom_point(aes(x=dist, y=pct20), colour='#E50914',
+             size=3) +
+  xlim(0-2, dist+2) +
+  ylim(0, 1.05*max_pct) +
+  geom_text(label=lab20, 
+            y=title_genre_1520$pct20, 
+            x=rep.int(dist, nrow(title_genre_1520)),
+            hjust=-0.2,
+            vjust=0.7,
+            size=3.5) +
+  geom_text(label=lab15, 
+            y=title_genre_1520$pct15, 
+            x=rep.int(0, nrow(title_genre_1520)),
+            hjust=1.2,
+            size=3.5) +
+  ggtitle("Top 5 genres in 2015 vs. 2020")
+
+slopeplt + theme(panel.background = element_blank(),
+               panel.grid=element_blank(),
+               axis.ticks=element_blank(),
+               axis.text=element_blank(),
+               panel.border=element_blank())
+
+
+
 
 # Create layout -------------------------------------
 
