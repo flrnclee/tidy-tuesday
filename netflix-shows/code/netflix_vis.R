@@ -2,12 +2,10 @@
 
 library(tidytuesdayR)
 library(tidyverse)
-library(DataExplorer)
 library(Cairo)
 library(patchwork)
 library(splitstackshape)
 library(extrafont)
-loadfonts(device="win")
 library(ggplot2)
 library(ggtext)
 library(ggfx)
@@ -92,7 +90,7 @@ stripplt <- ggplot() +
   guides(fill = guide_colourbar(title.position = 'top', title.hjust = 0.5, barwidth = unit(20, 'lines'), barheight = unit(0.5, 'lines')))
 
 stripplt + 
-  theme(text = element_text(family='Verdana'), 
+  theme(text = element_text(family='Aktiv Grotesk'), 
         panel.background = element_blank(),
         panel.grid=element_blank(),
         axis.ticks=element_blank(),
@@ -218,20 +216,20 @@ dist <- 5
 max_pct <- max(title_genre_1520$pct15, title_genre_1520$pct20)
 
 
-lab15<-paste(title_genre_1520$genre, (paste0(round(title_genre_1520$pct15,0), "% (#", title_genre_1520$rank15, ")")),sep=", ")
-lab20<-paste(title_genre_1520$genre, (paste0(round(title_genre_1520$pct20,0), "% (#", title_genre_1520$rank20, ")")),sep=", ")
+lab15<-paste(title_genre_1520$genre, (paste0(round(title_genre_1520$pct15,0), "%")),sep=", ")
+lab20<-paste(title_genre_1520$genre, (paste0(round(title_genre_1520$pct20,0), "%")),sep=", ")
 
 slopeplt <-ggplot(data = title_genre_1520) + 
   geom_segment(aes(x=0,xend=dist,y=pct15, yend=pct20), 
-               colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#000000"),
+               colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#808080"),
                size= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, 1.5, 0.7), 
                lineend="round") +
   geom_point(aes(x=0, y=pct15), 
-             colour=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#000000"),
-             size=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, 4, 3)) + 
+             colour=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#808080"),
+             size=3) + 
   geom_point(aes(x=dist, y=pct20), 
-             colour=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#000000"),
-             size=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, 4, 3)) +
+             colour=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#808080"),
+             size=3) +
   xlim(0-1.5, dist+1.5) +
   ylim(0, 1.05*max_pct) +
   geom_text(aes(label=lab20, y=pct20, x=rep.int(dist, nrow(title_genre_1520))),
@@ -239,41 +237,42 @@ slopeplt <-ggplot(data = title_genre_1520) +
             nudge_x=0.15,
             nudge_y=0.05,
             size=3, 
-            family='Verdana',
-            colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#000000"),
+            family='Aktiv Grotesk',
+            colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#808080"),
             fontface=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "bold", "plain")) +
   geom_text(aes(label=lab15, y=pct15, x=rep.int(0, nrow(title_genre_1520))),
             hjust=1, 
             nudge_x=-0.15,
             nudge_y=0.05,
             size=3,
-            family='Verdana',
-            colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#000000"),
+            family='Aktiv Grotesk',
+            colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#808080"),
             fontface=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "bold", "plain")) +
   geom_text(label="2015", x=0, y=max_pct+3,
             hjust=1,
             size=4,
-            family='Verdana') +
+            family='Aktiv Grotesk') +
   geom_text(label="2020", x=dist, y=max_pct+3,
             hjust=0,
             size=4,
-            family='Verdana') +
+            family='Aktiv Grotesk') +
   labs(title="<b>The rise of International titles</b><br>
-    <span style = 'font-size:10pt;'>Right before Netflix ramped up the number
-    of titles they were adding per month, only 19% of titles were International in 2015. By 2020,
-       **nearly half** of added titles were International.</span></span>")
+    <span style = 'font-size:11pt;'>Right before Netflix ramped up the number
+    of titles they were adding per month, only 19% were International in 2015. **By 2020,
+       nearly half were.**</span>")
 
 # Customize theme for slope plot
 
-slopeplt + theme(text = element_text(family='Verdana'), 
+slopeplt + theme(text = element_text(family='Aktiv Grotesk'), 
   panel.background = element_blank(),
   panel.grid=element_blank(),
   axis.ticks=element_blank(),
   axis.text=element_blank(),
   panel.border=element_blank(),
   plot.title = element_textbox_simple(
-    lineheight = 1.05,
-    padding = margin(5.5, 5.5, 5.5, 5.5)
+    lineheight = 1,
+    padding = margin(5.5, 5.5, 5.5, 5.5),
+    size = 15
   ),
   axis.title.x = element_blank(),
   axis.title.y = element_blank())
@@ -282,18 +281,27 @@ slopeplt + theme(text = element_text(family='Verdana'),
 
 layout <- c(
   
-  area(1, 1, 4, 15),
-  area(5, 1, 10, 15),
-  area(11, 1, 12, 3),
-  area(11, 4, 12, 15),
-  area(13, 1, 14, 3),
-  area(13, 4, 14, 15),
-  area(15, 1, 16, 3),
-  area(15, 4, 16, 15),
-  area(17, 1, 18, 3),
-  area(17, 4, 18, 15),
-  area(19, 1, 20, 3),
-  area(19, 4, 20, 15)
+  area(t = 1,
+       l = 1,
+       b = 3,
+       r = 10),
+  area(t = 4,
+       l = 1, 
+       b = 6,
+       r = 10),
+  area(t = 7,
+       l = 1, 
+       b = 10,
+       r = 10),
+  area(t = 11,
+       l = 1, 
+       b = 16,
+       r = 4),
+  area(t = 11,
+       l = 5, 
+       b = 16,
+       r = 10)
+  
 )
 
 plot(layout)
@@ -302,23 +310,20 @@ plot(layout)
 # Test area -------------------------------------------
 
 df <- data.frame(
-  x = 0.1,
-  y = 0.8,
-  label = "*Lorem ipsum dolor sit amet,* consectetur adipiscing
-  elit. Quisque tincidunt eget arcu in pulvinar. Morbi varius leo
-  vel consectetur luctus. **Morbi facilisis justo non fringilla.**
-  Vivamus sagittis sem felis, vel lobortis risus mattis eget. Nam
-  quis imperdiet felis, in convallis elit."
+  x = c(0.1, 0.2, 0.3),
+  y = c(0.8, 0.8, 0.8),
+  label = c("<span style = 'font-size: 15pt; font-family: BebasNeueBold;'>Text1</span><br>AAA", "Text2", "Text3")
 )
 
 p <- ggplot() +
   geom_textbox(
     data = df,
     aes(x, y, label = label),
-    width = grid::unit(0.73, "npc"), # 73% of plot panel width
+    width = 0.1,
     hjust = 0, vjust = 1
   ) +
-  xlim(0, 1) + ylim(0, 1)
+  xlim(0, 1) + ylim(0, 1) +
+  theme_void()
 
 p 
 
