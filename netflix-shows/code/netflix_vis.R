@@ -81,7 +81,7 @@ stripplt <- ggplot() +
             mapping = aes(x = date_added_my_pos, y = 1, fill = n_all), 
             width = 30) +
   scale_fill_gradient(name="<span style='font-size:8pt'>Titles added per month</span>", 
-                      low="#190103", high="#e50914",
+                      low="#190103", high="#B81D24",
                       limits=c(0,300)) +
   scale_x_continuous(breaks = axisbreaks, 
                      labels = axislabels$label, 
@@ -223,14 +223,14 @@ lab20<-paste(title_genre_1520$genre, (paste0(round(title_genre_1520$pct20,0), "%
 
 slopeplt <-ggplot(data = title_genre_1520) + 
   geom_segment(aes(x=0,xend=dist,y=pct15, yend=pct20), 
-               colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#808080"),
+               colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#B81D24", "#808080"),
                size= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, 1.5, 0.7), 
                lineend="round") +
   geom_point(aes(x=0, y=pct15), 
-             colour=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#808080"),
+             colour=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#B81D24", "#808080"),
              size=3) + 
   geom_point(aes(x=dist, y=pct20), 
-             colour=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#808080"),
+             colour=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#B81D24", "#808080"),
              size=3) +
   xlim(0-1.5, dist+1.5) +
   ylim(0, 1.05*max_pct) +
@@ -240,7 +240,7 @@ slopeplt <-ggplot(data = title_genre_1520) +
             nudge_y=0.05,
             size=3, 
             family='Aktiv Grotesk',
-            colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#808080"),
+            colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#B81D24", "#808080"),
             fontface=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "bold", "plain")) +
   geom_text(aes(label=lab15, y=pct15, x=rep.int(0, nrow(title_genre_1520))),
             hjust=1, 
@@ -248,7 +248,7 @@ slopeplt <-ggplot(data = title_genre_1520) +
             nudge_y=0.05,
             size=3,
             family='Aktiv Grotesk',
-            colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#E50914", "#808080"),
+            colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "#B81D24", "#808080"),
             fontface=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "bold", "plain")) +
   geom_text(label="2015", x=0, y=max_pct+3,
             hjust=1,
@@ -258,7 +258,7 @@ slopeplt <-ggplot(data = title_genre_1520) +
             hjust=0,
             size=4,
             family='Aktiv Grotesk') +
-  labs(title="<b>The rise of International titles</b><br>
+  labs(title="<span style='font-size:25pt; font-family:BebasNeueBold';><b>The rise of International titles</b></span><br>
     <span style = 'font-size:11pt;'>Right before Netflix ramped up the number
     of titles they were adding per month, only 19% were International in 2015. **By 2020,
        nearly half were.**</span>")
@@ -313,34 +313,49 @@ plot(layout)
 
 df <- data.frame(
   x = c(0.0, 0.35, 0.7, 1.05, 1.4),
-  y = c(0.8, 0.8, 0.8, 0.8, 0.8),
-  box.colour = NA,
-  fill = NA,
+  y = c(0.3, 0.3, 0.3, 0.3, 0.3),
   label = c(paste0("<span style = 'font-size: 10pt; font-family: AktivGrotesk-Bold;'>", title_genre_1520$genre[1], "</span><br>
           <img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/5760c14904fbf0ddeba0f181af0d3b1b62cc6d35/netflix-shows/imgs/international.png', width='50'/><br>
           <span style = 'font-size: 18pt; font-family: BebasNeueBold;'>", title_genre_1520$n20[1], " TITLES</span>"),
             paste0("<span style = 'font-size: 10pt; font-family: AktivGrotesk-Bold;'>", title_genre_1520$genre[2], "</span><br>
-          <img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/5760c14904fbf0ddeba0f181af0d3b1b62cc6d35/netflix-shows/imgs/international.png', width='50'/><br>
+          <img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/5760c14904fbf0ddeba0f181af0d3b1b62cc6d35/netflix-shows/imgs/drama.png', width='50'/><br>
           <span style = 'font-size: 18pt; font-family: BebasNeueBold;'>", title_genre_1520$n20[2], " TITLES</span>"),
             paste0("<span style = 'font-size: 10pt; font-family: AktivGrotesk-Bold;'>", title_genre_1520$genre[3], "</span><br>
-          <img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/5760c14904fbf0ddeba0f181af0d3b1b62cc6d35/netflix-shows/imgs/international.png', width='50'/><br>
+          <img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/5760c14904fbf0ddeba0f181af0d3b1b62cc6d35/netflix-shows/imgs/comedy.png', width='50'/><br>
           <span style = 'font-size: 18pt; font-family: BebasNeueBold;'>", title_genre_1520$n20[3], " TITLES</span>"),
             paste0("<span style = 'font-size: 10pt; font-family: AktivGrotesk-Bold;'>", title_genre_1520$genre[4], "</span><br>
-          <img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/5760c14904fbf0ddeba0f181af0d3b1b62cc6d35/netflix-shows/imgs/international.png', width='50'/><br>
+          <img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/5760c14904fbf0ddeba0f181af0d3b1b62cc6d35/netflix-shows/imgs/family.png', width='50'/><br>
           <span style = 'font-size: 18pt; font-family: BebasNeueBold;'>", title_genre_1520$n20[4], " TITLES</span>"),
             paste0("<span style = 'font-size: 10pt; font-family: AktivGrotesk-Bold;'>", title_genre_1520$genre[5], "</span><br>
-          <img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/5760c14904fbf0ddeba0f181af0d3b1b62cc6d35/netflix-shows/imgs/international.png', width='50'/><br>
-          <span style = 'font-size: 18pt; font-family: BebasNeueBold;'>", title_genre_1520$n20[5], " TITLES</span>")))
+          <img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/5760c14904fbf0ddeba0f181af0d3b1b62cc6d35/netflix-shows/imgs/romance.png', width='50'/><br>
+          <span style = 'font-size: 18pt; font-family: BebasNeueBold;'>", title_genre_1520$n20[5], " TITLES</span>")),
+  box_color = c('#B81D24', '#B81D24', '#B81D24', '#B81D24', '#B81D24'))
             
 p <- ggplot() +
   geom_textbox(
     data = df,
-    aes(x, y, label = label),
+    aes(x, y, label = label,
+        box.colour = box_color, 
+        box.size = rep(0.7, 5)),
     width = 0.15,
     hjust = 0, vjust = 1,
     halign = 0.5
   ) +
-  xlim(0, 2.0) + ylim(0, 1) +
-  theme_void()
+  xlim(0, 2.0) + ylim(0, 0.3) +
+  labs(title="<span style='font-size:25pt; font-family:BebasNeueBold';><b>The rise of International titles</b></span>")
+  
 
-p 
+p + theme(text = element_text(family='Aktiv Grotesk'), 
+        panel.background = element_blank(),
+        panel.grid=element_blank(),
+        axis.ticks=element_blank(),
+        axis.text=element_blank(),
+        panel.border=element_blank(),
+        plot.title = element_textbox_simple(
+          lineheight = 1,
+          padding = margin(5.5, 5.5, 5.5, 5.5),
+          size = 15,
+          halign = 0
+        ),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank())
