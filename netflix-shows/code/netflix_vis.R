@@ -189,8 +189,9 @@ title_genre_yr[is.na(title_genre_yr)]
 title_genre_20 <- title_genre_yr %>%
   filter(year_added=="2020") %>%
   arrange(-pct) %>%
-  select(genre, pct) %>%
-  rename("pct20"="pct")
+  select(genre, pct, n) %>%
+  rename("pct20"="pct", 
+         "n20"="n")
 
 order_pct <- order(title_genre_20$pct20, decreasing = T)
 title_genre_20$rank20 <- NA 
@@ -200,8 +201,9 @@ title_genre_20
 title_genre_15 <- title_genre_yr %>%
   filter(year_added=="2015") %>%
   arrange(-pct) %>%
-  select(genre, pct) %>%
-  rename("pct15"="pct")
+  select(genre, pct, n) %>%
+  rename("pct15"="pct",
+         "n15"="n")
 
 order_pct <- order(title_genre_15$pct15, decreasing = T)
 title_genre_15$rank15 <- NA 
@@ -307,25 +309,38 @@ layout <- c(
 plot(layout)
 
 
-# Test area -------------------------------------------
+# Top 5 title genres -------------------------------------------
 
 df <- data.frame(
-  x = c(0.1, 0.2, 0.3),
-  y = c(0.8, 0.8, 0.8),
-  label = c("<span style = 'font-size: 15pt; font-family: BebasNeueBold;'>Text1</span><br>AAA", "Text2", "Text3")
-)
-
+  x = c(0.0, 0.35, 0.7, 1.05, 1.4),
+  y = c(0.8, 0.8, 0.8, 0.8, 0.8),
+  box.colour = NA,
+  fill = NA,
+  label = c(paste0("<span style = 'font-size: 10pt; font-family: AktivGrotesk-Bold;'>", title_genre_1520$genre[1], "</span><br>
+          <img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/5760c14904fbf0ddeba0f181af0d3b1b62cc6d35/netflix-shows/imgs/international.png', width='50'/><br>
+          <span style = 'font-size: 18pt; font-family: BebasNeueBold;'>", title_genre_1520$n20[1], " TITLES</span>"),
+            paste0("<span style = 'font-size: 10pt; font-family: AktivGrotesk-Bold;'>", title_genre_1520$genre[2], "</span><br>
+          <img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/5760c14904fbf0ddeba0f181af0d3b1b62cc6d35/netflix-shows/imgs/international.png', width='50'/><br>
+          <span style = 'font-size: 18pt; font-family: BebasNeueBold;'>", title_genre_1520$n20[2], " TITLES</span>"),
+            paste0("<span style = 'font-size: 10pt; font-family: AktivGrotesk-Bold;'>", title_genre_1520$genre[3], "</span><br>
+          <img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/5760c14904fbf0ddeba0f181af0d3b1b62cc6d35/netflix-shows/imgs/international.png', width='50'/><br>
+          <span style = 'font-size: 18pt; font-family: BebasNeueBold;'>", title_genre_1520$n20[3], " TITLES</span>"),
+            paste0("<span style = 'font-size: 10pt; font-family: AktivGrotesk-Bold;'>", title_genre_1520$genre[4], "</span><br>
+          <img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/5760c14904fbf0ddeba0f181af0d3b1b62cc6d35/netflix-shows/imgs/international.png', width='50'/><br>
+          <span style = 'font-size: 18pt; font-family: BebasNeueBold;'>", title_genre_1520$n20[4], " TITLES</span>"),
+            paste0("<span style = 'font-size: 10pt; font-family: AktivGrotesk-Bold;'>", title_genre_1520$genre[5], "</span><br>
+          <img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/5760c14904fbf0ddeba0f181af0d3b1b62cc6d35/netflix-shows/imgs/international.png', width='50'/><br>
+          <span style = 'font-size: 18pt; font-family: BebasNeueBold;'>", title_genre_1520$n20[5], " TITLES</span>")))
+            
 p <- ggplot() +
   geom_textbox(
     data = df,
     aes(x, y, label = label),
-    width = 0.1,
-    hjust = 0, vjust = 1
+    width = 0.15,
+    hjust = 0, vjust = 1,
+    halign = 0.5
   ) +
-  xlim(0, 1) + ylim(0, 1) +
+  xlim(0, 2.0) + ylim(0, 1) +
   theme_void()
 
 p 
-
-# https://ggplot2-book.org/annotations.html
-# https://www.cedricscherer.com/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/#text 
