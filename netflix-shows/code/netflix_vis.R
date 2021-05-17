@@ -11,10 +11,8 @@ library(ggtext)
 library(ggfx)
 library(scales)
 
-
 # Read in data from TidyTuesday
 tuesdata <- tidytuesdayR::tt_load(2021, week = 17)
-
 nfx_data <- tuesdata$netflix
 
 # Explore and prep ---------------------------------
@@ -68,9 +66,7 @@ title_cts_mo <- title_cts_mo %>%
 
 # Cleaning up data by genre ------------------------------------------
 
-nfx_genre <- nfx_mod
-
-nfx_genre <- nfx_genre %>%
+nfx_genre <- nfx_mod %>%
   cSplit("listed_in", sep=",")
 
 clean_genre <- function(col) {
@@ -128,7 +124,7 @@ nfx_genre <- nfx_genre %>%
 # on latest date_added.
 
 
-# Look at genre counts -------------------------
+# Look at genre counts -----------------------------------------
 
 title_genre_yr <- nfx_genre %>%
   group_by(year_added) %>%
@@ -144,8 +140,7 @@ title_genre_yr <- title_genre_yr %>%
 
 title_genre_yr[is.na(title_genre_yr)]
 
-# Slope graph to compare change between titles released
-# in 2015 and titles released in 2020
+# Compare change between titles released in 2015 and titles released in 2020
 
 title_genre_20 <- title_genre_yr %>%
   filter(year_added=="2020") %>%
@@ -176,7 +171,7 @@ title_genre_1520 <- title_genre_20 %>%
   filter((rank20 >= 1 & rank20 <= 5) | (rank15 >=1 & rank15 <= 5))
 
 
-# Create title img ------------------
+# Create title img -----------------------------------------------------------
 
 b_text <- data.frame(
   x = c(0, 0),
@@ -189,7 +184,7 @@ b <- ggplot() +
     data = b_text,
     aes(x, y, label = label),
     box.size = 0,
-    family = c('BebasNeueBook', 'BebasNeueBook'),
+    family = c("BebasNeueBook", "BebasNeueBook"),
     size = c(30, 7),
     width = unit(1, "npc"),
     fill = NA,
@@ -200,7 +195,7 @@ b <- ggplot() +
   scale_x_continuous(limits=c(0, 1), expand=c(0,0)) +
   scale_y_continuous(limits=c(-1,1.5), expand=c(0,0))
 
-bnr <- b + theme(text = element_text(family='Aktiv Grotesk'), 
+bnr <- b + theme(text = element_text(family="Aktiv Grotesk"), 
           panel.background = element_blank(),
           panel.grid=element_blank(),
           axis.ticks=element_blank(),
@@ -229,6 +224,7 @@ axislabels <- data.frame(label = title_cts_mo$date_added_my[seq(1, length(title_
 max_added_mo <- title_cts_mo %>% filter(n_all==max(n_all))
 
 strip <- ggplot() + 
+  # Start strip plot when titles per month were ramping up
   geom_tile(data = title_cts_mo %>% filter(date_added_my >= "2015-01-01"), 
             mapping = aes(x = date_added_my_pos, y = 1, fill = n_all), 
             width = 30) +
@@ -239,7 +235,7 @@ strip <- ggplot() +
                      position = "bottom",
                      expand=c(0,0)) +
   guides(fill = guide_colourbar(title.position = 'top', title.hjust = 0.5, barwidth = unit(10, 'lines'), barheight = unit(0.5, 'lines'))) +
-  labs(title=glue::glue("<span style='font-size:20pt; font-family:BebasNeueBold';>Netflix added a record number of titles right before COVID.</span>
+  labs(title=glue::glue("<span style='font-size:20pt; font-family:BebasNeueBold';>Netflix hit its record number of titles added in a month right before COVID.</span>
        \n<span style='font-size:13pt;'><span style='color:#B81D24'>**{max_added$n_all} titles**</span> were added in {months(max_added$date_added_my)} {format(max_added$date_added_my, '%Y')}.</span>")) +
   geom_tile(data = max_added_mo,
             mapping = aes(x=date_added_my_pos,
@@ -249,11 +245,11 @@ strip <- ggplot() +
             size = 1)
 
 stripplt <- strip + 
-  theme(text = element_text(family='Aktiv Grotesk'), 
+  theme(text = element_text(family="Aktiv Grotesk"), 
         panel.background = element_blank(),
         panel.grid=element_blank(),
         axis.ticks=element_blank(),
-        axis.text.x=element_text(colour='#000000'),
+        axis.text.x=element_text(colour="#000000"),
         axis.text.y=element_blank(),
         panel.border=element_blank(),
         legend.title=element_blank(),
@@ -295,9 +291,9 @@ p <- ggplot() +
   geom_textbox(
     data = df,
     aes(x, y, label = label),
-    family = c('BebasNeueBook', 'BebasNeueBook', 'BebasNeueBook', 'BebasNeueBook', 'BebasNeueBook', 
-               'AktivGrotesk-Regular', 'AktivGrotesk-Regular', 'AktivGrotesk-Regular', 'AktivGrotesk-Regular', 'AktivGrotesk-Regular',
-               'BebasNeueBook', 'BebasNeueBook', 'BebasNeueBook', 'BebasNeueBook', 'BebasNeueBook'),
+    family = c("BebasNeueBook", "BebasNeueBook", "BebasNeueBook", "BebasNeueBook", "BebasNeueBook", 
+               "AktivGrotesk-Regular", "AktivGrotesk-Regular", "AktivGrotesk-Regular", "AktivGrotesk-Regular", "AktivGrotesk-Regular",
+               "BebasNeueBook", "BebasNeueBook", "BebasNeueBook", "BebasNeueBook", "BebasNeueBook"),
     size = c(5, 5, 5, 5, 5, 
              30, 30, 30, 30, 30,
              7, 7, 7, 7, 7),
@@ -312,10 +308,10 @@ p <- ggplot() +
   ) +
   scale_x_continuous(limits=c(0, 1.8), expand=c(0,0)) +
   scale_y_continuous(limits=c(-1.5, 0.5), expand=c(0,0)) +
-  labs(title=glue::glue("<span style='font-size:20pt; font-family:BebasNeueBold';>During COVID, {comma(covid_added$n_all)} titles were released.</span>
-       \n<span style='font-size:13pt;'><span style='color:#B81D24'>**{max_genre$genre} titles**</span> led the pack with {max_genre$n20} titles.</span>"))
+  labs(title=glue::glue("<span style='font-size:20pt; font-family:BebasNeueBold';>During the first year of COVID, {comma(covid_added$n_all)} titles were released.</span>
+       \n<span style='font-size:13pt;'><span style='color:#B81D24'>**{max_genre$genre} titles**</span> led the pack with {max_genre$n20} titles released in 2020.</span>"))
 
-pict <- p + theme(text = element_text(family='Aktiv Grotesk'), 
+pict <- p + theme(text = element_text(family="Aktiv Grotesk"), 
                   panel.background = element_blank(),
                   panel.grid=element_blank(),
                   axis.ticks=element_blank(),
@@ -343,28 +339,28 @@ lab20<-paste(title_genre_1520$genre, (paste0(round(title_genre_1520$pct20,0), "%
 slopeplt <-ggplot(data = title_genre_1520) + 
   geom_segment(aes(x=0,xend=dist,y=pct15, yend=pct20), 
                colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, 
-                              ifelse(title_genre_1520$genre == 'International', "#B81D24", "#000000"), 
+                              ifelse(title_genre_1520$genre == "International", "#B81D24", "#000000"), 
                               "#808080"),
                size= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, 1.5, 0.7), 
                lineend="round") +
   geom_point(aes(x=0, y=pct15), 
              colour=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, 
-                           ifelse(title_genre_1520$genre == 'International', "#B81D24", "#000000"), 
+                           ifelse(title_genre_1520$genre == "International", "#B81D24", "#000000"), 
                                   "#808080"),
              size=3) + 
   geom_point(aes(x=dist, y=pct20), 
              colour=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, 
-                           ifelse(title_genre_1520$genre == 'International', "#B81D24", "#000000"), 
+                           ifelse(title_genre_1520$genre == "International", "#B81D24", "#000000"), 
                            "#808080"),
              size=3) +
-  xlim(0-1.5, dist+1.5) +
-  ylim(0, 1.05*max_pct) +
+  scale_x_continuous(limits=c(0-1.5, dist+1.5)) +
+  scale_y_continuous(limits=c(0, 1.05*max_pct)) +
   geom_text(aes(label=lab20, y=pct20, x=rep.int(dist, nrow(title_genre_1520))),
             hjust=0, 
             nudge_x=0.15,
             nudge_y=0.05,
             size=3.5, 
-            family='Aktiv Grotesk',
+            family="Aktiv Grotesk",
             colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, 
                            ifelse(title_genre_1520$genre == 'International', "#B81D24", "#000000"), 
                            "#808080"),
@@ -374,7 +370,7 @@ slopeplt <-ggplot(data = title_genre_1520) +
             nudge_x=-0.15,
             nudge_y=0.05,
             size=3.5,
-            family='Aktiv Grotesk',
+            family="Aktiv Grotesk",
             colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, 
                            ifelse(title_genre_1520$genre == 'International', "#B81D24", "#000000"), 
                            "#808080"),
@@ -383,12 +379,12 @@ slopeplt <-ggplot(data = title_genre_1520) +
             hjust=1,
             size=3.5,
             colour="#808080",
-            family='Aktiv Grotesk') +
+            family="Aktiv Grotesk") +
   geom_text(label="2020", x=dist, y=max_pct+3,
             hjust=0,
             size=3.5,
             colour="#808080",
-            family='Aktiv Grotesk') +
+            family="Aktiv Grotesk") +
   labs(title=glue::glue("<span style='font-size:20pt; font-family:BebasNeueBold';><b>International titles have been on the rise.</b></span>
     \n<span style = 'font-size:13pt;'>In 2015, only 19% of the added titles on Netflix were International. 
     <span style = 'color:#B81D24;'>**By 2020, nearly half were.**</span></span>"))
