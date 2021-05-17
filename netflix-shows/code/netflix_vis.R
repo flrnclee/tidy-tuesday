@@ -235,7 +235,7 @@ strip <- ggplot() +
                      position = "bottom",
                      expand=c(0,0)) +
   guides(fill = guide_colourbar(title.position = 'top', title.hjust = 0.5, barwidth = unit(10, 'lines'), barheight = unit(0.5, 'lines'))) +
-  labs(title=glue::glue("<span style='font-size:20pt; font-family:BebasNeueBold';>Netflix hit its record number of titles added in a month right before COVID.</span>
+  labs(title=glue::glue("<span style='font-size:21pt; font-family:BebasNeueBold';>Netflix hit its record number of titles added in a month right before COVID.</span>
        \n<span style='font-size:13pt;'><span style='color:#B81D24'>**{max_added$n_all} titles**</span> were added in {months(max_added$date_added_my)} {format(max_added$date_added_my, '%Y')}.</span>")) +
   geom_tile(data = max_added_mo,
             mapping = aes(x=date_added_my_pos,
@@ -273,7 +273,7 @@ df <- data.frame(
         0.0, 0.35, 0.7, 1.05, 1.4),
   y = c(0, 0, 0, 0, 0,
         0.15, 0.15, 0.15, 0.15, 0.15,
-        -1.22, -1.22, -1.22, -1.22, -1.22),
+        -1.3, -1.3, -1.3, -1.3, -1.3),
   label = c(title_genre_1520$genre[1], title_genre_1520$genre[2], title_genre_1520$genre[3], title_genre_1520$genre[4], title_genre_1520$genre[5],
             "<img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/main/netflix-shows/imgs/international.png', width='65'/>",
             "<img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/main/netflix-shows/imgs/drama.png', width='65'/>",
@@ -307,8 +307,8 @@ p <- ggplot() +
     halign = 0.5
   ) +
   scale_x_continuous(limits=c(0, 1.8), expand=c(0,0)) +
-  scale_y_continuous(limits=c(-1.5, 0.5), expand=c(0,0)) +
-  labs(title=glue::glue("<span style='font-size:20pt; font-family:BebasNeueBold';>During the first year of COVID, {comma(covid_added$n_all)} titles were released.</span>
+  scale_y_continuous(limits=c(-1.3, 0.5), expand=c(0,0)) +
+  labs(title=glue::glue("<span style='font-size:21pt; font-family:BebasNeueBold';>During the first year of COVID, {comma(covid_added$n_all)} titles were released.</span>
        \n<span style='font-size:13pt;'><span style='color:#B81D24'>**{max_genre$genre} titles**</span> led the pack with {max_genre$n20} titles released in 2020.</span>"))
 
 pict <- p + theme(text = element_text(family="Aktiv Grotesk"), 
@@ -385,7 +385,7 @@ slopeplt <-ggplot(data = title_genre_1520) +
             size=3.5,
             colour="#808080",
             family="Aktiv Grotesk") +
-  labs(title=glue::glue("<span style='font-size:20pt; font-family:BebasNeueBold';><b>International titles have been on the rise.</b></span>
+  labs(title=glue::glue("<span style='font-size:21pt; font-family:BebasNeueBold';><b>International titles have been on the rise.</b></span>
     \n<span style = 'font-size:13pt;'>In 2015, only 19% of the added titles on Netflix were International. 
     <span style = 'color:#B81D24;'>**By 2020, nearly half were.**</span></span>"))
 
@@ -423,9 +423,9 @@ layout <- c(
        r = 10),
   area(t = 7,
        l = 1, 
-       b = 12,
+       b = 11,
        r = 10),
-  area(t = 13,
+  area(t = 12,
        l = 1, 
        b = 25,
        r = 10))
