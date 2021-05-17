@@ -228,7 +228,7 @@ strip <- ggplot() +
   geom_tile(data = title_cts_mo %>% filter(date_added_my >= "2015-01-01"), 
             mapping = aes(x = date_added_my_pos, y = 1, fill = n_all), 
             width = 30) +
-  scale_fill_gradient(low="#190103", high="#B81D24", 
+  scale_fill_gradient(low="#f5f5f1", high="#B81D24", 
                       expand=c(0,0)) +
   scale_x_continuous(breaks = axisbreaks, 
                      labels = axislabels$label, 
@@ -236,7 +236,7 @@ strip <- ggplot() +
                      expand=c(0,0)) +
   guides(fill = guide_colourbar(title.position = 'top', title.hjust = 0.5, barwidth = unit(10, 'lines'), barheight = unit(0.5, 'lines'))) +
   labs(title=glue::glue("<span style='font-size:21pt; font-family:BebasNeueBold';>Netflix hit its record number of titles added in a month right before COVID.</span>
-       \n<span style='font-size:13pt;'><span style='color:#B81D24'>**{max_added$n_all} titles**</span> were added in {months(max_added$date_added_my)} {format(max_added$date_added_my, '%Y')}.</span>")) +
+       \n<span style='font-size:13pt;'><span style='color:#B81D24'>**{max_added_mo$n_all} titles**</span> were added in {months(max_added_mo$date_added_my)} {format(max_added_mo$date_added_my, '%Y')}.</span>")) +
   geom_tile(data = max_added_mo,
             mapping = aes(x=date_added_my_pos,
                           y = 1), 
