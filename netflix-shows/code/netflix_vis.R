@@ -189,7 +189,7 @@ b <- ggplot() +
     data = b_text,
     aes(x, y, label = label),
     box.size = 0,
-    family = c('BebasNeueBold', 'BebasNeueBold'),
+    family = c('BebasNeueBook', 'BebasNeueBook'),
     size = c(30, 7),
     width = unit(1, "npc"),
     fill = NA,
