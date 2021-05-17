@@ -291,19 +291,19 @@ p <- ggplot() +
   geom_textbox(
     data = df,
     aes(x, y, label = label),
-    family = c("BebasNeueBook", "BebasNeueBook", "BebasNeueBook", "BebasNeueBook", "BebasNeueBook", 
-               "AktivGrotesk-Regular", "AktivGrotesk-Regular", "AktivGrotesk-Regular", "AktivGrotesk-Regular", "AktivGrotesk-Regular",
-               "BebasNeueBook", "BebasNeueBook", "BebasNeueBook", "BebasNeueBook", "BebasNeueBook"),
-    size = c(5, 5, 5, 5, 5, 
-             30, 30, 30, 30, 30,
-             7, 7, 7, 7, 7),
+    family = c(rep("BebasNeueBook", 5), 
+               rep("AktivGrotesk-Regular", 5),
+               rep("BebasNeueBook", 5)),
+    size = c(rep(5, 5), 
+             rep(30, 5),
+             rep(7, 5)),
     box.size = NA,
     fill = NA,
     width = unit(0.2, "npc"),
     hjust = 0, 
-    vjust = c(0, 0, 0, 0, 0, 
-              1, 1, 1, 1, 1, 
-              0, 0, 0, 0, 0),
+    vjust = c(rep(0,5), 
+              rep(1, 5), 
+              rep(0, 5)),
     halign = 0.5
   ) +
   scale_x_continuous(limits=c(0, 1.8), expand=c(0,0)) +
@@ -437,7 +437,7 @@ bnr +
   theme(plot.background = element_rect(fill = "#f5f5f1", colour = "#f5f5f1"))
 
 ggsave(
-  paste0("netflix", format(Sys.time(), "%d%m%Y"), ".png"),
+  paste0("netflix", format(Sys.time(), "%Y%m%d"), ".png"),
   dpi = 320,
   width = 8.5,
   height = 11,

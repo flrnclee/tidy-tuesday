@@ -21,6 +21,7 @@
 
 * `extrafont` 
 * `glue` (why have I been using `paste`!?)
+* `patchwork`
 * `ggtext` 
 * Love `ifelse`-ing inside of ggplot
 * `geom_textbox` is awesome but need some work with sizing in final PNG
