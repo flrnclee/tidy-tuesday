@@ -17,6 +17,15 @@
 **Data source:** Kaggle  
 **Dimensions:** 7,787 rows x 12 columns
 
+## Helpful Packages & Musings
+
+* `extrafont` 
+* `glue` (why have I been using paste0!?)
+* `ggtext` 
+* Love `ifelse`-ing inside of ggplot
+* `geom_textbox` is awesome but need some work with sizing in final PNG
+* Graphics from [The Noun Project](https://www.thenounproject.com)
+* Strip plots/horizontal tile plots look cool (and save space) but don't give allow for precise extraction of numbers
 
 
 
