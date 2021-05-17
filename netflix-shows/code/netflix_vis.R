@@ -106,8 +106,8 @@ nfx_genre <- nfx_genre %>%
          listed_in_3,
          na.rm= TRUE) %>%
   select(-cat) %>%
-  # There are 68 titles that had a generic genre (e.g., "Movies", "TV", or "Shows").
-  # These were excluded.
+  # There are 68 instances of titleshad generic genres (e.g., "Movies", "TV", or "Shows").
+  # Instances of titles with generic genres were removed.
   filter(!(genre==""))
 
 # After cleaning genres in listed_in columns, 
@@ -362,7 +362,7 @@ slopeplt <-ggplot(data = title_genre_1520) +
             size=3.5, 
             family="Aktiv Grotesk",
             colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, 
-                           ifelse(title_genre_1520$genre == 'International', "#B81D24", "#000000"), 
+                           ifelse(title_genre_1520$genre == "International", "#B81D24", "#000000"), 
                            "#808080"),
             fontface=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "bold", "plain")) +
   geom_text(aes(label=lab15, y=pct15, x=rep.int(0, nrow(title_genre_1520))),
@@ -372,7 +372,7 @@ slopeplt <-ggplot(data = title_genre_1520) +
             size=3.5,
             family="Aktiv Grotesk",
             colour= ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, 
-                           ifelse(title_genre_1520$genre == 'International', "#B81D24", "#000000"), 
+                           ifelse(title_genre_1520$genre == "International", "#B81D24", "#000000"), 
                            "#808080"),
             fontface=ifelse(title_genre_1520$rank20 < title_genre_1520$rank15, "bold", "plain")) +
   geom_text(label="2015", x=0, y=max_pct+3,
@@ -391,7 +391,7 @@ slopeplt <-ggplot(data = title_genre_1520) +
 
 # Customize theme for slope plot
 
-slopeplt <- slopeplt + theme(text = element_text(family='Aktiv Grotesk'), 
+slopeplt <- slopeplt + theme(text = element_text(family="Aktiv Grotesk"), 
   panel.background = element_blank(),
   panel.grid=element_blank(),
   axis.ticks=element_blank(),
@@ -429,8 +429,6 @@ layout <- c(
        l = 1, 
        b = 25,
        r = 10))
-
-plot(layout)
 
 bnr + 
   stripplt + 
