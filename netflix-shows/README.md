@@ -1,9 +1,3 @@
----
-title: Visualizing Netflix Titles
-author: Florence Lee/@flrnclee
-output: html_document
----
-
 # Visualizing Netflix Titles
  
 ## Submission
@@ -11,7 +5,7 @@ output: html_document
 
 ## Notes
 * Titles include both TV shows and movies.   
-* Genres are not mutually exclusive. Titles are often classified with up to tree genres.   
+* Genres are not mutually exclusive. Titles are often classified with up to three genres.   
 * The *Children & Family* category includes Kids titles in addition to Children & Family titles.  
 * The *International* category includes all non-U.S. titles (e.g., British, Spanish-language, Korean).  
 * The *Documentaries* category includes both documentaries and docuseries.   
