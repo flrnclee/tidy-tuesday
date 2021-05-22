@@ -12,6 +12,7 @@ library(ggtext)
 library(ggfx)
 library(scales)
 library(fontawesome)
+library(viridis)
 
 # Read in data from TidyTuesday
 tuesdata <- tidytuesdayR::tt_load(2021, week = 21)
@@ -97,9 +98,9 @@ sapply(us_list_ind, function(x) sum(is.na(x))) %>%
 us_list_ind <- us_list_ind %>%
   mutate(career_stage = 
            case_when(
-             how_old_are_you %in% c("under 18", "18-24", "25-34") ~ "Early career",
-             how_old_are_you %in% c("35-44", "45-54") ~ "Mid career",
-             how_old_are_you %in% c("55-64", "65 or over") ~ "Late career",
+             how_old_are_you %in% c("under 18", "18-24", "25-34") ~ "Early",
+             how_old_are_you %in% c("35-44", "45-54") ~ "Mid",
+             how_old_are_you %in% c("55-64", "65 or over") ~ "Late",
              TRUE ~ NA_character_)
          ) %>%
   mutate(gender_recode = 
@@ -112,8 +113,58 @@ us_list_ind <- us_list_ind %>%
 # Visualizing ---------------------------------------------------------
 
 # Chart male and female differences in salary 
-# by industry and gender
+# by industry and career stage
 
+salary_disp <- us_list_ind %>%
+  filter(gender_recode %in% c("Man", "Woman"))
+
+salary_disp$career_stage <- factor(salary_disp$career_stage, 
+                                   levels = c("Early", "Mid", "Late"))
+
+# Only keep those industries where there are enough data for both 
+# men and women respondents. This will kick out a lot of industries
+# because the population is Ask A Manager readers (mostly women).
+
+salary_disp_a <- salary_disp %>%
+  group_by(gender_recode, industry, career_stage) %>%
+  summarise(count=n()) %>%
+  ungroup() %>%
+  unite(col="gender_stage", c("gender_recode", "career_stage"), sep="_") %>%
+  spread(gender_stage, count) %>%
+  filter(Man_Early>=3 & Man_Late>=3 & Man_Mid>=3 &
+           Woman_Early>=3 & Woman_Late>=3 & Woman_Mid>=3) %>%
+  gather("gender_stage", "count", -industry) %>%
+  separate(gender_stage, into=c("gender_recode", "career_stage")) %>%
+  group_by(gender_recode, industry, career_stage)
+
+salary_disp_b <- salary_disp %>%
+  group_by(gender_recode, industry, career_stage) %>%
+  summarise(med_salary=median(annual_salary))
+
+salary_disp_grp <- salary_disp_a %>%
+  left_join(salary_disp_b) %>%
+  select(-count) %>%
+  spread(gender_recode, med_salary) %>%
+  rename("med_salary_m"="Man",
+         "med_salary_w"="Woman") %>%
+  mutate(gender_diff = med_salary_m-med_salary_w)
+
+e <- ggplot(salary_disp_grp %>% filter(career_stage=="Early" & !is.na(gender_diff)), aes(x=reorder(industry, gender_diff), y=gender_diff)) + 
+  geom_bar(stat="identity") +
+  scale_y_continuous(limits=c(-11000,120000)) +
+  coord_flip()
+
+m <- ggplot(salary_disp_grp %>% filter(career_stage=="Mid" & !is.na(gender_diff)), aes(x=reorder(industry, gender_diff), y=gender_diff)) + 
+  geom_bar(stat="identity") +
+  scale_y_continuous(limits=c(-11000,120000)) +
+  coord_flip()
+
+l <- ggplot(salary_disp_grp %>% filter(career_stage=="Late" & !is.na(gender_diff)), aes(x=reorder(industry, gender_diff), y=gender_diff)) + 
+  geom_bar(stat="identity") +
+  scale_y_continuous(limits=c(-11000,120000)) +
+  coord_flip()
+
+e + m + l
 
 #https://cran.r-project.org/web/packages/ggtext/vignettes/plotting_text.html 
 #https://ggplot2.tidyverse.org/reference/annotate.html
