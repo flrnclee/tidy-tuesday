@@ -112,20 +112,19 @@ us_list_ind <- us_list_ind %>%
 
 # Visualizing ---------------------------------------------------------
 
-# Chart male and female differences in salary 
-# by industry and career stage
-
 salary_disp <- us_list_ind %>%
-  filter(gender_recode %in% c("Man", "Woman"))
-
-salary_disp$career_stage <- factor(salary_disp$career_stage, 
-                                   levels = c("Early", "Mid", "Late"))
+  filter(gender_recode %in% c("Man", "Woman")) %>%
+  mutate(industry = 
+           case_when(
+             industry == "Education (Higher Education)" ~ "Higher Education",
+             TRUE ~ industry
+           ))
 
 # Only keep those industries where there are enough data for both 
 # men and women respondents. This will kick out a lot of industries
 # because the population is Ask A Manager readers (mostly women).
 
-salary_disp_a <- salary_disp %>%
+salary_stage_disp_a <- salary_disp %>%
   group_by(gender_recode, industry, career_stage) %>%
   summarise(count=n()) %>%
   ungroup() %>%
@@ -137,35 +136,124 @@ salary_disp_a <- salary_disp %>%
   separate(gender_stage, into=c("gender_recode", "career_stage")) %>%
   group_by(gender_recode, industry, career_stage)
 
-salary_disp_b <- salary_disp %>%
+salary_stage_disp_b <- salary_disp %>%
   group_by(gender_recode, industry, career_stage) %>%
   summarise(med_salary=median(annual_salary))
 
-salary_disp_grp <- salary_disp_a %>%
-  left_join(salary_disp_b) %>%
+salary_stage_disp <- salary_stage_disp_a %>%
+  left_join(salary_stage_disp_b) %>%
   select(-count) %>%
   spread(gender_recode, med_salary) %>%
   rename("med_salary_m"="Man",
          "med_salary_w"="Woman") %>%
-  mutate(gender_diff = med_salary_m-med_salary_w)
+  mutate(gender_diff = (med_salary_m-med_salary_w)/1000) %>%
+  mutate(career_stage = 
+           case_when(
+             career_stage=="Early" ~ "Early career",
+             career_stage=="Mid" ~ "Mid career", 
+             career_stage=="Late" ~ "Late career",
+             TRUE ~ NA_character_
+           ))
 
-e <- ggplot(salary_disp_grp %>% filter(career_stage=="Early" & !is.na(gender_diff)), aes(x=reorder(industry, gender_diff), y=gender_diff)) + 
+salary_stage_disp$career_stage <- factor(salary_stage_disp$career_stage, 
+                                   levels = c("Early career", "Mid career", "Late career"))
+
+ggplot(salary_stage_disp, aes(x=gender_diff, y=fct_rev(career_stage))) +
   geom_bar(stat="identity") +
-  scale_y_continuous(limits=c(-11000,120000)) +
-  coord_flip()
+  facet_wrap(~industry)
 
-m <- ggplot(salary_disp_grp %>% filter(career_stage=="Mid" & !is.na(gender_diff)), aes(x=reorder(industry, gender_diff), y=gender_diff)) + 
-  geom_bar(stat="identity") +
-  scale_y_continuous(limits=c(-11000,120000)) +
-  coord_flip()
+# Chart male and female differences in salary 
+# by industry and career stage
 
-l <- ggplot(salary_disp_grp %>% filter(career_stage=="Late" & !is.na(gender_diff)), aes(x=reorder(industry, gender_diff), y=gender_diff)) + 
-  geom_bar(stat="identity") +
-  scale_y_continuous(limits=c(-11000,120000)) +
-  coord_flip()
+us_use_ind <- salary_stage_disp$industry %>% unique()
 
-e + m + l
+salary_all_disp_a <- salary_disp %>%
+  subset(industry %in% us_use_ind) %>%
+  group_by(gender_recode, industry) %>%
+  summarise(count=n()) %>%
+  ungroup() %>%
+  spread(gender_recode, count) %>%
+  filter(Man>=3 & Woman>=3) %>%
+  gather("gender_recode", "count", -industry) %>%
+  group_by(gender_recode, industry)
 
-#https://cran.r-project.org/web/packages/ggtext/vignettes/plotting_text.html 
+salary_all_disp_b <- salary_disp %>%
+  group_by(gender_recode, industry) %>%
+  summarise(med_salary=median(annual_salary))
+
+salary_all_disp <- salary_all_disp_a %>%
+  left_join(salary_all_disp_b) %>%
+  select(-count) %>%
+  spread(gender_recode, med_salary) %>%
+  rename("med_salary_m"="Man",
+         "med_salary_w"="Woman") %>%
+  mutate(gender_diff = (med_salary_m-med_salary_w)/1000) %>%
+  arrange(-gender_diff)
+
+
+# Make a dot plot -----------------------------------------------------
+
+salary_all_disp$industry <- str_to_sentence(salary_all_disp$industry)
+salary_stage_disp$industry <- str_to_sentence(salary_stage_disp$industry)
+
+ind_order <- salary_all_disp$industry
+salary_all_disp$industry <- factor(salary_all_disp$industry,
+                                      levels=ind_order)
+salary_stage_disp$industry <- factor(salary_stage_disp$industry,
+                                   levels=ind_order)
+
+bkgrd_color <- "#fbf3ed"
+dot_size <- 4
+txt_color <- "#454545"
+
+#Frame 1
+ggplot(data=salary_all_disp, aes(x=gender_diff, y=reorder(industry, gender_diff))) +
+  scale_x_continuous(labels=dollar_format(prefix="$", suffix="K"), breaks=breaks_pretty(5)) +
+  #Frame 2
+  geom_point(data=salary_all_disp, aes(x=gender_diff, y=reorder(industry, gender_diff)),
+             size=dot_size, shape=0, colour="black") +
+  geom_vline(xintercept = 0, size=0.25, colour="#888888") +
+  #Frame 3
+  geom_point(data=salary_stage_disp, aes(x=gender_diff, y=fct_rev(industry),
+                                         colour=career_stage, fill=career_stage),
+             size=dot_size, shape=21, colour=bkgrd_color) +
+  scale_fill_manual(values = c("Late career"="#de8971", 
+                               "Mid career"="#7b6079", 
+                               "Early career"="#a7d0cd"),
+                    aesthetics = c("colour", "fill")) +
+  geom_point(data=salary_all_disp, aes(x=gender_diff, y=reorder(industry, gender_diff)),
+             size=dot_size, shape=0, colour="black") +
+  labs(title = "Salary gap between men and women, further broken out for
+       <b><span style='color: #a7d0cd; font-size:11pt; font-family:Webdings;'>n</span>
+       <span style='color: #a7d0cd;'>early career</span></b>, 
+       <b><span style='color: #7b6079; font-size:11pt; font-family:Webdings;'>n</span>
+       <span style='color: #7b6079'>mid career</span></b>, 
+       and <b><span style='color: #de8971; font-size:10pt; font-family:Webdings;'>n</span>
+       <span style='color: #de8971'>late career</span></b> professionals.") +
+  #geom_richtext(aes(y="Law", x=110, label = "label"), 
+                #fontface="Overpass", hjust=1, nudge_x=-1,
+                #fill=NA, label.colour=NA) +
+  theme(text = element_text(family="Overpass", color=txt_color), 
+          panel.background = element_blank(),
+          panel.grid=element_blank(),
+          axis.ticks=element_blank(),
+          axis.text=element_textbox_simple(
+            size=10),
+          panel.border=element_blank(),
+          panel.grid.major.y = element_line(linetype="dotted", colour = "#cccccc"),
+          plot.background = element_rect(fill = bkgrd_color),
+          plot.title = element_textbox_simple(
+            lineheight = 1.1,
+            padding = margin(t=20, r=10, b=20, l=0),
+            halign = 0, 
+            color = txt_color),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(), 
+        legend.position = "none") 
+
+
+
+
+  #https://cran.r-project.org/web/packages/ggtext/vignettes/plotting_text.html 
 #https://ggplot2.tidyverse.org/reference/annotate.html
 #https://github.com/wilkelab/ggtext/issues/8 
