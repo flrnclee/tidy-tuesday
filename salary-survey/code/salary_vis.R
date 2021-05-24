@@ -18,7 +18,11 @@ library(viridis)
 tuesdata <- tidytuesdayR::tt_load(2021, week = 21)
 salary_data <- tuesdata$survey
 
-update_geom_defaults("text", list(family = "Overpass"))
+# Global variables ------------------------------------
+bkgrd_color <- "#fbf3ed"
+dot_size <- 4
+txt_color <- "#454545"
+font_use <- "Overpass"
 
 # Data cleaning ---------------------------------------
 
@@ -120,6 +124,8 @@ salary_disp <- us_list_ind %>%
              TRUE ~ industry
            ))
 
+salary_disp$industry <- str_to_sentence(salary_disp$industry)
+
 # Only keep those industries where there are enough data for both 
 # men and women respondents. This will kick out a lot of industries
 # because the population is Ask A Manager readers (mostly women).
@@ -191,10 +197,18 @@ salary_all_disp <- salary_all_disp_a %>%
   arrange(-gender_diff)
 
 
-# Make a dot plot -----------------------------------------------------
+label_rowname <- glue::glue("<span style='color: {bkgrd_color};'>Label row</span>")
+label_data <- data.frame(industry=label_rowname, gender_diff=1000)
 
-salary_all_disp$industry <- str_to_sentence(salary_all_disp$industry)
-salary_stage_disp$industry <- str_to_sentence(salary_stage_disp$industry)
+salary_all_disp <- salary_all_disp %>%
+  bind_rows(label_data) %>%
+  arrange(-gender_diff)
+
+salary_stage_disp <- salary_stage_disp %>%
+  bind_rows(label_data) %>%
+  arrange(-gender_diff)
+
+# Make a dot plot -----------------------------------------------------
 
 ind_order <- salary_all_disp$industry
 salary_all_disp$industry <- factor(salary_all_disp$industry,
@@ -202,19 +216,23 @@ salary_all_disp$industry <- factor(salary_all_disp$industry,
 salary_stage_disp$industry <- factor(salary_stage_disp$industry,
                                    levels=ind_order)
 
-bkgrd_color <- "#fbf3ed"
-dot_size <- 4
-txt_color <- "#454545"
 
 #Frame 1
-ggplot(data=salary_all_disp, aes(x=gender_diff, y=reorder(industry, gender_diff))) +
-  scale_x_continuous(labels=dollar_format(prefix="$", suffix="K"), breaks=breaks_pretty(5)) +
-  #Frame 2
-  geom_point(data=salary_all_disp, aes(x=gender_diff, y=reorder(industry, gender_diff)),
-             size=dot_size, shape=0, colour="black") +
+base <- ggplot(data=salary_all_disp, aes(x=gender_diff, y=reorder(industry, gender_diff))) +
+  scale_x_continuous(limits=c(-20, 110), labels=dollar_format(prefix="$", suffix="K"), breaks=breaks_pretty(8)) +
+  geom_hline(yintercept=label_rowname, size=10, colour=bkgrd_color) +
   geom_vline(xintercept = 0, size=0.25, colour="#888888") +
+  geom_richtext(x=0, y=label_rowname, label="<span style='font-size:9pt; color:#B1ABA3'>
+  <b style='font-family:Overpass'>Higher for men </b><span style='font-family:Wingdings3;'>g</span></span>",
+                hjust=0, nudge_x=0.5, fill=NA, label.colour=NA) +
+  geom_richtext(x=0, y=label_rowname, label="<span style='font-size:9pt; color:#B1ABA3'>
+  <span style='font-family:Wingdings3;'>f</span><b style='font-family:Overpass'> Higher for women</b></span>",
+                hjust=1, nudge_x=1, fill=NA, label.colour=NA)
+
+base + geom_point(data=salary_all_disp, aes(x=gender_diff, y=reorder(industry, gender_diff)),
+             size=dot_size, shape=0, colour="black") +
   #Frame 3
-  geom_point(data=salary_stage_disp, aes(x=gender_diff, y=fct_rev(industry),
+  geom_point(data=salary_stage_disp, aes(x=gender_diff, y=industry,
                                          colour=career_stage, fill=career_stage),
              size=dot_size, shape=21, colour=bkgrd_color) +
   scale_fill_manual(values = c("Late career"="#de8971", 
@@ -222,38 +240,45 @@ ggplot(data=salary_all_disp, aes(x=gender_diff, y=reorder(industry, gender_diff)
                                "Early career"="#a7d0cd"),
                     aesthetics = c("colour", "fill")) +
   geom_point(data=salary_all_disp, aes(x=gender_diff, y=reorder(industry, gender_diff)),
-             size=dot_size, shape=0, colour="black") +
-  labs(title = "Salary gap between men and women, further broken out for
-       <b><span style='color: #a7d0cd; font-size:11pt; font-family:Webdings;'>n</span>
-       <span style='color: #a7d0cd;'>early career</span></b>, 
-       <b><span style='color: #7b6079; font-size:11pt; font-family:Webdings;'>n</span>
-       <span style='color: #7b6079'>mid career</span></b>, 
-       and <b><span style='color: #de8971; font-size:10pt; font-family:Webdings;'>n</span>
-       <span style='color: #de8971'>late career</span></b> professionals.") +
-  #geom_richtext(aes(y="Law", x=110, label = "label"), 
-                #fontface="Overpass", hjust=1, nudge_x=-1,
-                #fill=NA, label.colour=NA) +
-  theme(text = element_text(family="Overpass", color=txt_color), 
+             size=dot_size, shape=0, stroke=1, colour="black") +
+  labs(title = "<b>The <span style='font-size:11pt; font-family:Webdings;'>c</span> median annual salary 
+  was higher for men than for women across 12 industries, with the highest salary difference observed in Law.</b><br>",
+       subtitle="<span style='font-size:10pt'>The gender gap was especially high for <b><span style='color: #de8971; font-family:Webdings;'>n</span><span style='color: #de8971'> late career</span></b>
+   professionals compared with <b><span style='color: #a7d0cd; font-family:Webdings;'>n</span><span style='color: #a7d0cd;'> early career</span></b> and 
+       <br><b><span style='color: #7b6079; font-family:Webdings;'>n</span><span style='color: #7b6079'> mid career</span></b> professionals.",
+       caption = "#TidyTuesday | @flrnclee") +
+  xlab("Difference in median salary") +
+  theme(text = element_text(family=font_use, color=txt_color), 
           panel.background = element_blank(),
           panel.grid=element_blank(),
           axis.ticks=element_blank(),
-          axis.text=element_textbox_simple(
-            size=10),
+          axis.text.x=element_markdown(),
+          axis.text.y=element_markdown(),
           panel.border=element_blank(),
-          panel.grid.major.y = element_line(linetype="dotted", colour = "#cccccc"),
+          panel.grid.major.x = element_line(linetype="dotted", colour = "#DFDFDF"),
+          panel.grid.major.y = element_line(linetype="dotted", colour = "#CBCBCB"),
           plot.background = element_rect(fill = bkgrd_color),
           plot.title = element_textbox_simple(
-            lineheight = 1.1,
-            padding = margin(t=20, r=10, b=20, l=0),
+            padding = margin(t=20, r=10, b=0, l=0),
             halign = 0, 
             color = txt_color),
-          axis.title.x = element_blank(),
-          axis.title.y = element_blank(), 
+        plot.subtitle = element_textbox_simple(
+          padding = margin(t=0, r=10, b=20, l=0),
+          halign = 0, 
+          color = txt_color),
+          axis.title.x = element_textbox_simple(
+            padding = margin(t=10),
+            halign = 0.5, 
+            size = 10),
+          axis.title.y = element_blank(),
+        plot.caption = element_text(size=7.5, colour="#444444"), 
         legend.position = "none") 
 
-
-
-
-  #https://cran.r-project.org/web/packages/ggtext/vignettes/plotting_text.html 
-#https://ggplot2.tidyverse.org/reference/annotate.html
-#https://github.com/wilkelab/ggtext/issues/8 
+ggsave(
+  paste0("salarydisp", format(Sys.time(), "%Y%m%d"), ".png"),
+  dpi = 320,
+  width = 9,
+  height = 5,
+  units = "in",
+  type = "cairo-png"
+)
