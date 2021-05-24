@@ -246,7 +246,7 @@ base + geom_point(data=salary_all_disp, aes(x=gender_diff, y=reorder(industry, g
        subtitle="<span style='font-size:10pt'>The gender gap was especially high for <b><span style='color: #de8971; font-family:Webdings;'>n</span><span style='color: #de8971'> late career</span></b>
    professionals compared with <b><span style='color: #a7d0cd; font-family:Webdings;'>n</span><span style='color: #a7d0cd;'> early career</span></b> and 
        <br><b><span style='color: #7b6079; font-family:Webdings;'>n</span><span style='color: #7b6079'> mid career</span></b> professionals.",
-       caption = "#TidyTuesday | @flrnclee") +
+       caption = "#TidyTuesday | Week 21 • 5/18/21 | @flrnclee") +
   xlab("Difference in median salary") +
   theme(text = element_text(family=font_use, color=txt_color), 
           panel.background = element_blank(),
