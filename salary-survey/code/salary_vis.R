@@ -212,15 +212,15 @@ salary_all_disp <- salary_all_disp_a %>%
 # Temp solution is to add a row in the data so y dimension of annotation 
 # can be specified.
 
-label_rowname <- glue::glue("<span style='color: {bkgrd_color};'>Label row</span>")
-label_data <- data.frame(industry=label_rowname, gender_diff=1000)
+anno_rowname <- glue::glue("<span style='color: {bkgrd_color};'>Anno row</span>")
+anno_data <- data.frame(industry=anno_rowname, gender_diff=1000)
 
 salary_all_disp <- salary_all_disp %>%
-  bind_rows(label_data) %>%
+  bind_rows(anno_data) %>%
   arrange(-gender_diff)
 
 salary_stage_disp <- salary_stage_disp %>%
-  bind_rows(label_data) %>%
+  bind_rows(anno_data) %>%
   arrange(-gender_diff)
 
 # Turn to factor for proper sorting by salary difference overall 
@@ -238,12 +238,12 @@ salary_stage_disp$industry <- factor(salary_stage_disp$industry,
 
 base <- ggplot(data=salary_all_disp, aes(x=gender_diff, y=reorder(industry, gender_diff))) +
   scale_x_continuous(limits=c(-20, 110), labels=dollar_format(prefix="$", suffix="K"), breaks=breaks_pretty(8)) +
-  geom_hline(yintercept=label_rowname, size=10, colour=bkgrd_color) +
+  geom_hline(yintercept=anno_rowname, size=10, colour=bkgrd_color) +
   geom_vline(xintercept = 0, size=0.25, colour="#888888") +
-  geom_richtext(x=0, y=label_rowname, label="<span style='font-size:9pt; color:#B1ABA3'>
+  geom_richtext(x=0, y=anno_rowname, label="<span style='font-size:9pt; color:#B1ABA3'>
   <b style='font-family:Overpass'>Higher for men </b><span style='font-family:Wingdings3;'>g</span></span>",
                 hjust=0, nudge_x=0.5, fill=NA, label.colour=NA) +
-  geom_richtext(x=0, y=label_rowname, label="<span style='font-size:9pt; color:#B1ABA3'>
+  geom_richtext(x=0, y=anno_rowname, label="<span style='font-size:9pt; color:#B1ABA3'>
   <span style='font-family:Wingdings3;'>f</span><b style='font-family:Overpass'> Higher for women</b></span>",
                 hjust=1, nudge_x=1, fill=NA, label.colour=NA)
 
