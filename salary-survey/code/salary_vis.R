@@ -58,7 +58,7 @@ industry_ops <- c("Accounting, Banking & Finance",
                   "Utilities & Telecommunications")
 industry_ops <- str_to_title(industry_ops, locale = "en")
 
-# Keep the industries that match with existing list
+# Keep the industries that match with existing list.
 
 us_list_ind <- us_salary %>%
   filter(us_salary$industry %in% industry_ops) 
@@ -66,8 +66,8 @@ us_list_ind %>%
   count(industry) %>%
   arrange(-n)
 
-# 1,763 (8%) of responses were dropped.
-# Can use string distances to try to group if needed (stringdist)
+# 1,763 (8%) of responses were dropped, which isn't too bad.
+# Can use string distances to try to group if needed (stringdist).
 
 us_othr_ind <- us_salary %>%
   filter(!(us_salary$industry %in% industry_ops))
@@ -76,8 +76,8 @@ us_othr_ind %>%
   count(industry) %>%
   arrange(-n)
 
-# There are a lot of Librarians. Create new category
-# to try to increase data points here
+# There are a lot of Librarians. Just in case: create new category
+# to try to increase data points here.
 
 us_othr_ind$industry <- with(us_othr_ind,
                     ifelse(str_detect(us_othr_ind$industry, "Librar"),
@@ -114,9 +114,10 @@ us_list_ind <- us_list_ind %>%
              TRUE ~ NA_character_)
          )
 
-# Visualizing ---------------------------------------------------------
+# Data preparation ---------------------------------------------------------
 
 salary_disp <- us_list_ind %>%
+  # Restrict analysis to respondents who identified as a man or woman
   filter(gender_recode %in% c("Man", "Woman")) %>%
   mutate(industry = 
            case_when(
@@ -125,6 +126,9 @@ salary_disp <- us_list_ind %>%
            ))
 
 salary_disp$industry <- str_to_sentence(salary_disp$industry)
+
+
+#- Calculate gender gap in annual salary by industry and career stage
 
 # Only keep those industries where there are enough data for both 
 # men and women respondents. This will kick out a lot of industries
@@ -164,12 +168,16 @@ salary_stage_disp <- salary_stage_disp_a %>%
 salary_stage_disp$career_stage <- factor(salary_stage_disp$career_stage, 
                                    levels = c("Early career", "Mid career", "Late career"))
 
+#- Preview male and female differences in salary by industry and career stage
+
 ggplot(salary_stage_disp, aes(x=gender_diff, y=fct_rev(career_stage))) +
   geom_bar(stat="identity") +
   facet_wrap(~industry)
 
-# Chart male and female differences in salary 
-# by industry and career stage
+#- Calculate gender gap in annual salary by industry
+
+# Create a vector of the 12 industries being looked at in 
+# this analysis for filtering
 
 us_use_ind <- salary_stage_disp$industry %>% unique()
 
@@ -196,6 +204,13 @@ salary_all_disp <- salary_all_disp_a %>%
   mutate(gender_diff = (med_salary_m-med_salary_w)/1000) %>%
   arrange(-gender_diff)
 
+# Visualization -----------------------------------------------------
+
+#- Additional aesthetic prep
+
+# Need to make space at the top of the plot to add annotations.
+# Temp solution is to add a row in the data so y dimension of annotation 
+# can be specified.
 
 label_rowname <- glue::glue("<span style='color: {bkgrd_color};'>Label row</span>")
 label_data <- data.frame(industry=label_rowname, gender_diff=1000)
@@ -208,7 +223,7 @@ salary_stage_disp <- salary_stage_disp %>%
   bind_rows(label_data) %>%
   arrange(-gender_diff)
 
-# Make a dot plot -----------------------------------------------------
+# Turn to factor for proper sorting by salary difference overall 
 
 ind_order <- salary_all_disp$industry
 salary_all_disp$industry <- factor(salary_all_disp$industry,
@@ -216,8 +231,11 @@ salary_all_disp$industry <- factor(salary_all_disp$industry,
 salary_stage_disp$industry <- factor(salary_stage_disp$industry,
                                    levels=ind_order)
 
+#- Create dotplot
 
-#Frame 1
+# There is an issue with running base alone. 
+# Troubleshoot later...
+
 base <- ggplot(data=salary_all_disp, aes(x=gender_diff, y=reorder(industry, gender_diff))) +
   scale_x_continuous(limits=c(-20, 110), labels=dollar_format(prefix="$", suffix="K"), breaks=breaks_pretty(8)) +
   geom_hline(yintercept=label_rowname, size=10, colour=bkgrd_color) +
@@ -229,10 +247,8 @@ base <- ggplot(data=salary_all_disp, aes(x=gender_diff, y=reorder(industry, gend
   <span style='font-family:Wingdings3;'>f</span><b style='font-family:Overpass'> Higher for women</b></span>",
                 hjust=1, nudge_x=1, fill=NA, label.colour=NA)
 
-base + geom_point(data=salary_all_disp, aes(x=gender_diff, y=reorder(industry, gender_diff)),
-             size=dot_size, shape=0, colour="black") +
-  #Frame 3
-  geom_point(data=salary_stage_disp, aes(x=gender_diff, y=industry,
+base + 
+  geom_point(data=salary_stage_disp, aes(x=gender_diff, y=reorder(industry, gender_diff),
                                          colour=career_stage, fill=career_stage),
              size=dot_size, shape=21, colour=bkgrd_color) +
   scale_fill_manual(values = c("Late career"="#de8971", 
