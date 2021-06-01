@@ -339,8 +339,8 @@ summ_txt <- data.frame(
         y = c(0, 0, 0),
         label = c(
                 glue::glue("<p><span style='font-family:AlfaSlabOne-Regular; font-size:30pt;'>{record_num}</span></p><p><span style='font-family:Overpass; font-size:10pt';><b>WORLD RECORDS</b></span></p>"), 
-                glue::glue("<p><span style='font-family:AlfaSlabOne-Regular; font-size:30pt;'>{nation_num}</span></p><p><span style='font-family:Overpass; font-size:10pt;'><b>COUNTRIES REPRESENTED</b></span></p>"), 
-                glue::glue("<p><span style='font-family:AlfaSlabOne-Regular; font-size:30pt;'>{player_num}</span></p><p><span style='font-family:Overpass; font-size:10pt;'><b>WORLD RECORD HOLDERS</b></span></p>")) 
+                glue::glue("<p><span style='font-family:AlfaSlabOne-Regular; font-size:30pt;'>{player_num}</span></p><p><span style='font-family:Overpass; font-size:10pt;'><b>WORLD RECORD HOLDERS</b></span></p>"),
+                glue::glue("<p><span style='font-family:AlfaSlabOne-Regular; font-size:30pt;'>{nation_num}</span></p><p><span style='font-family:Overpass; font-size:10pt;'><b>COUNTRIES REPRESENTED</b></span></p>")) 
 )
 
 summary <- ggplot() +
