@@ -146,7 +146,7 @@ dot_plt <- ggplot(data=nation_rec_my, aes(x=wr_num)) +
                 family=font_use, fontface="bold", size=3, lineheight = 1.2, color = txt_color, fill=NA, label.colour=NA,
                 hjust="right", vjust="bottom") +
         labs(title = glue::glue("Most countries can break <b><span style='color: {wr_colors[1]}';>
-                                1 to 5 world records</span></b> in a competitive month, but it's unusual for a country to break <b><span 
+                                1 to 5 world records</span></b> in a competitive month. It's unusual to break <b><span 
                                 style='color: {wr_colors[4]}';>more than 10</b>."),
              caption = "Includes three-lap, non-shortcut world records.") + 
         xlab("Number of world records in a month") +
