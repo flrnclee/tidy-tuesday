@@ -142,7 +142,7 @@ dot_plt <- ggplot(data=nation_rec_my, aes(x=wr_num)) +
         annotate(
                 geom="richtext", x=38, y=0.1, 
                 label=glue::glue("In September 1998, Australia <br>broke <b><span style='color: {wr_colors[5]}';>39 world records</span></b>
-                                 thanks <br>to one player: <b>Penev</b>."),
+                                 thanks <br>to one player: <b> Alex Penev</b>."),
                 family=font_use, fontface="bold", size=3, lineheight = 1.2, color = txt_color, fill=NA, label.colour=NA,
                 hjust="right", vjust="bottom") +
         labs(title = glue::glue("Most countries can break <b><span style='color: {wr_colors[1]}';>
@@ -295,7 +295,7 @@ tile_plt
 title_txt <- data.frame(
         x = 0,
         y = 0,
-        label = c("<img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/main/mario-kart/imgs/mario-kart-64-logo.png', width='100'/> WORLD RECORDS"))
+        label = c("<img src='https://raw.githubusercontent.com/flrnclee/tidy-tuesday/main/mario-kart/imgs/mario-kart-64-logo.png', width='130'/> WORLD RECORDS"))
 
 title <- ggplot() +
         # dropshadow
@@ -309,7 +309,7 @@ title <- ggplot() +
                         width = unit(1, "npc"),
                         fill = NA,
                         hjust = 0, vjust = 0.5,
-                        halign = 0.5, valign = 0.5
+                        halign = 0.5, valign = 1
         ), x_offset=10, y_offset=10, sigma=5) +
         scale_x_continuous(limits=c(0, 1), expand=c(0,0)) +
         scale_y_continuous(limits=c(-1,1), expand=c(0,0)) + 
@@ -382,19 +382,19 @@ summary
 layout <- c(
         area(t = 1,
              l = 1,
-             b = 3,
+             b = 2,
              r = 12),
-        area(t = 4,
+        area(t = 3,
              l = 1,
-             b = 5,
+             b = 4,
              r = 12),
-        area(t = 6,
+        area(t = 5,
              l = 1,
-             b = 11,
+             b = 10,
              r = 5),
-        area(t = 6,
+        area(t = 5,
              l = 6, 
-             b = 11,
+             b = 10,
              r = 12))
 
 title + summary + dot_plt + tile_plt +
