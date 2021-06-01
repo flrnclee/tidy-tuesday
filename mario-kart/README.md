@@ -1,4 +1,4 @@
-# Visualizing Netflix Titles
+# Visualizing MarioKart64 World Records
  
 ## Submission
 ![](https://raw.githubusercontent.com/flrnclee/tidy-tuesday/main/mario-kart/mariokart20210601.png)
