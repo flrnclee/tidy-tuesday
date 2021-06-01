@@ -147,8 +147,7 @@ dot_plt <- ggplot(data=nation_rec_my, aes(x=wr_num)) +
                 hjust="right", vjust="bottom") +
         labs(title = glue::glue("Most countries can break <b><span style='color: {wr_colors[1]}';>
                                 1 to 5 world records</span></b> in a competitive month. It's unusual to break <b><span 
-                                style='color: {wr_colors[4]}';>more than 10</b>."),
-             caption = "Includes three-lap, non-shortcut world records.") + 
+                                style='color: {wr_colors[4]}';>more than 10</b>.")) + 
         xlab("Number of world records in a month") +
         theme(text = element_text(
                 family=font_use, 
@@ -255,7 +254,8 @@ tile_plt <- ggplot(data=record_sept, aes(x=date_pos, y=track, fill=player_label)
                    starshape=1, show.legend = FALSE) +
                    labs(title = glue::glue("After breaking 39 world records (<span style='font-family:Wingdings';>\uF0B6</span>) in September 1998, <span style='color:#E52521';><b>Penev</b></span> was the 
                                            world record holder in 11 of the 16 tracks."),
-                        caption = "#TidyTuesday | Week 22 • 5/25/21 | @flrnclee") +
+                        caption = "<b>World records:</b> Includes three-lap, non-shortcut world records.<br>
+                        #TidyTuesday | Week 22 • 5/25/21 | @flrnclee") +
         theme(text = element_text(
                 family=font_use, 
                 color=txt_color), 
@@ -278,8 +278,9 @@ tile_plt <- ggplot(data=record_sept, aes(x=date_pos, y=track, fill=player_label)
                       padding = margin(t=10, r=10, b=10, l=5),
                       size = 12,
                       halign = 0),
-              plot.caption = element_text(size=7.5, 
-                                          colour=txt_color),
+              plot.caption = element_markdown(size=7.5, 
+                                          colour=txt_color, 
+                                          lineheight=1.5),
               plot.margin = margin(l=0, r=10),
               # legend settings
               legend.position = "top",
