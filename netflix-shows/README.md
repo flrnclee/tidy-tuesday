@@ -3,6 +3,9 @@
 ## Submission
 ![](https://raw.githubusercontent.com/flrnclee/tidy-tuesday/main/netflix-shows/netflix20210517.png)
 
+## Sketch
+![](https://github.com/flrnclee/tidy-tuesday/blob/main/netflix-shows/netflix-sketch.png)
+
 ## Notes
 * Titles include both TV shows and movies.   
 * Genres are not mutually exclusive. Titles are often classified with up to three genres.   
